@@ -1,0 +1,92 @@
+﻿<!-- Modal -->
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalProductoLabel">Agregar Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formProducto">
+                    <input type="hidden" id="productoId" />
+                    <input type="hidden" id="imagenActual" />
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="nombre" required maxlength="20">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" rows="3" maxlength="500" placeholder="Descripción del producto (opcional)"></textarea>
+                        <small class="text-muted">Máximo 500 caracteres</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="categoriaId" class="form-label">Categoría *</label>
+                            <select class="form-select" id="categoriaId" required>
+                                <option value="">Seleccione categoría</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="estacionId" class="form-label">Estación</label>
+                            <select class="form-select" id="estacionId">
+                                <option value="">Ninguna</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN DE VARIANTES -->
+                    <div class="mb-3">
+                        <label class="form-label">Precios por Tamaño *</label>
+                        <div id="variantes">
+                            <div class="row mb-2 variante-row">
+                                <div class="col-md-5">
+                                    <select class="form-select tamaño-select" required>
+                                        <option value="">Seleccione tamaño</option>
+                                        <option value="Personal">Personal</option>
+                                        <option value="Mediano">Mediano</option>
+                                        <option value="Fuente">Fuente</option>
+                                        <option value="Familiar">Familiar</option>
+                                        <option value="Individual">Individual</option>
+                                        <option value="Grande">Grande</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="number" step="0.01" class="form-control precio-input" placeholder="Precio" required min="0">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger btn-sm btn-eliminar-variante">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAgregarVariante">
+                            <i class="bi bi-plus"></i> Agregar Tamaño
+                        </button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imagen" class="form-label">Imagen</label>
+                        <input type="file" class="form-control" id="imagen" accept="image/*">
+                        <small class="text-muted">JPG, PNG, GIF o BMP (máx. 5MB)</small>
+                        <div id="vistaPrevia" class="mt-2"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-select" id="estado">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

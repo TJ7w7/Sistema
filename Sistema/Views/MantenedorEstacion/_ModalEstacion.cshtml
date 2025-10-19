@@ -1,0 +1,32 @@
+﻿<!-- Modal único para Agregar / Editar -->
+<div class="modal fade" id="modalEstacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEstacionLabel">Agregar Estación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEstacion">
+                    <input type="hidden" id="estacionId" />
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-select" id="estado">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,502 @@
+﻿@{
+    ViewData["Title"] = "Gestión de Insumos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-3">Gestión de Insumos</h2>
+
+<!-- Botones -->
+<div class="mb-3">
+    <button type="button" class="btn btn-primary" id="btnAgregar">
+        <i class="bi bi-plus-circle"></i> Agregar Insumo
+    </button>
+</div>
+
+<!-- Tabla -->
+<table id="tablaInsumos" class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Unidad</th>
+            <th>Estaciones</th>
+            <th>Stock Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<!-- Modal Insumo -->
+<div class="modal fade" id="modalInsumo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalInsumoLabel">Agregar Insumo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formInsumo">
+                    <input type="hidden" id="insumoId" />
+
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="nombre" required maxlength="100">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="unidadMedida" class="form-label">Unidad de Medida *</label>
+                        <select class="form-select" id="unidadMedida" required>
+                            <option value="">Seleccione unidad</option>
+                            <option value="Kg">Kilogramo (Kg)</option>
+                            <option value="g">Gramo (g)</option>
+                            <option value="Lt">Litro (Lt)</option>
+                            <option value="ml">Mililitro (ml)</option>
+                            <option value="Unidad">Unidad</option>
+                            <option value="Caja">Caja</option>
+                            <option value="Bolsa">Bolsa</option>
+                            <option value="Paquete">Paquete</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-select" id="estado">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gestionar Stock por Estación -->
+<div class="modal fade" id="modalStock" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Gestionar Stock: <span id="nombreInsumoStock"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="insumoIdStock" />
+                <input type="hidden" id="unidadMedidaStock" />
+
+                <!-- Lista de estaciones asignadas -->
+                <h6 class="mb-3">Estaciones Asignadas</h6>
+                <div id="listaEstacionesAsignadas" class="mb-4">
+                    <!-- Se cargará dinámicamente -->
+                </div>
+
+                <!-- Agregar nueva estación -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Agregar a Nueva Estación</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="formAgregarEstacion">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="estacionId" class="form-label">Estación *</label>
+                                    <select class="form-select" id="estacionId" required>
+                                        <option value="">Seleccione...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="stockActual" class="form-label">Stock Actual *</label>
+                                    <input type="number" step="0.01" class="form-control" id="stockActual" required min="0">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="stockMinimo" class="form-label">Stock Mínimo *</label>
+                                    <input type="number" step="0.01" class="form-control" id="stockMinimo" required min="0">
+                                </div>
+                                <div class="col-md-2 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-plus"></i> Agregar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            // ========================================
+            // DATATABLE
+            // ========================================
+            var tabla = $('#tablaInsumos').DataTable({
+                ajax: {
+                    url: '@Url.Action("ObtenerInsumos", "MantenedorInsumo")',
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "insumoId" },
+                    { data: "nombre" },
+                    { data: "unidadMedida" },
+                    {
+                        data: "cantidadEstaciones",
+                        render: function (data) {
+                            return `<span class="badge bg-info">${data} estación(es)</span>`;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            if (row.estaciones.length === 0) {
+                                return '<span class="text-muted">Sin asignar</span>';
+                            }
+                            var html = '';
+                            row.estaciones.forEach(e => {
+                                var clase = e.esBajoStock ? 'text-danger' : 'text-success';
+                                html += `<div class="${clase}"><small>${e.nombreEstacion}: ${e.stockActual} ${row.unidadMedida}</small></div>`;
+                            });
+                            return html;
+                        }
+                    },
+                    {
+                        data: "estado",
+                        render: function (data) {
+                            return data ?
+                                '<span class="badge bg-success">Activo</span>' :
+                                '<span class="badge bg-danger">Inactivo</span>';
+                        }
+                    },
+                    {
+                        data: "insumoId",
+                        render: function (data, type, row) {
+                            var alertaBajoStock = row.tieneBajoStock ? '<i class="bi bi-exclamation-triangle text-warning"></i> ' : '';
+                            return `
+                                ${alertaBajoStock}
+                                <button class="btn btn-sm btn-warning btn-editar"
+                                        data-id="${row.insumoId}"
+                                        data-nombre="${row.nombre}"
+                                        data-unidad="${row.unidadMedida}"
+                                        data-estado="${row.estado}">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </button>
+                                <button class="btn btn-sm btn-info btn-stock"
+                                        data-id="${row.insumoId}"
+                                        data-nombre="${row.nombre}"
+                                        data-unidad="${row.unidadMedida}">
+                                    <i class="bi bi-box-seam"></i> Stock
+                                </button>
+                            `;
+                        }
+                    }
+                ],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                },
+                order: [[0, 'desc']]
+            });
+
+            // ========================================
+            // AGREGAR INSUMO
+            // ========================================
+            $("#btnAgregar").click(function () {
+                $("#modalInsumoLabel").text("Agregar Insumo");
+                $("#formInsumo")[0].reset();
+                $("#insumoId").val("");
+                $("#estado").val("true");
+                $("#modalInsumo").modal("show");
+            });
+
+            // ========================================
+            // EDITAR INSUMO
+            // ========================================
+            $(document).on("click", ".btn-editar", function () {
+                var id = $(this).data("id");
+                var nombre = $(this).data("nombre");
+                var unidad = $(this).data("unidad");
+                var estado = $(this).data("estado");
+
+                $("#modalInsumoLabel").text("Editar Insumo");
+                $("#insumoId").val(id);
+                $("#nombre").val(nombre);
+                $("#unidadMedida").val(unidad);
+                $("#estado").val(estado.toString());
+                $("#modalInsumo").modal("show");
+            });
+
+            // ========================================
+            // GUARDAR INSUMO
+            // ========================================
+            $("#formInsumo").submit(function (e) {
+                e.preventDefault();
+
+                var datos = {
+                    insumoId: parseInt($("#insumoId").val()) || 0,
+                    nombre: $("#nombre").val().trim(),
+                    unidadMedida: $("#unidadMedida").val(),
+                    estado: $("#estado").val() === "true"
+                };
+
+                if (!datos.nombre || !datos.unidadMedida) {
+                    alert("Complete todos los campos requeridos");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("GuardarInsumo", "MantenedorInsumo")',
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(datos),
+                    success: function (res) {
+                        alert(res.mensaje);
+                        if (res.exito) {
+                            $("#modalInsumo").modal("hide");
+                            tabla.ajax.reload();
+                        }
+                    }
+                });
+            });
+
+            // ========================================
+            // GESTIONAR STOCK POR ESTACIÓN
+            // ========================================
+            $(document).on("click", ".btn-stock", function () {
+                var insumoId = $(this).data("id");
+                var nombre = $(this).data("nombre");
+                var unidad = $(this).data("unidad");
+
+                $("#nombreInsumoStock").text(nombre);
+                $("#insumoIdStock").val(insumoId);
+                $("#unidadMedidaStock").val(unidad);
+
+                cargarEstacionesAsignadas(insumoId);
+                cargarEstacionesDisponibles();
+
+                $("#modalStock").modal("show");
+            });
+
+            // Cargar estaciones asignadas a un insumo
+            function cargarEstacionesAsignadas(insumoId) {
+                $.ajax({
+                    url: '@Url.Action("ObtenerEstacionesPorInsumo", "MantenedorInsumo")',
+                    type: "GET",
+                    data: { insumoId: insumoId },
+                    success: function (estaciones) {
+                        var container = $("#listaEstacionesAsignadas");
+                        container.html("");
+
+                        if (estaciones.length === 0) {
+                            container.html('<p class="text-muted">No hay estaciones asignadas</p>');
+                            return;
+                        }
+
+                        var unidad = $("#unidadMedidaStock").val();
+
+                        estaciones.forEach(function (e) {
+                            var alertaBajoStock = e.stockActual <= e.stockMinimo ?
+                                '<span class="badge bg-danger ms-2">Bajo Stock</span>' : '';
+
+                            var card = `
+                                <div class="card mb-2">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-3">
+                                                <strong>${e.nombreEstacion}</strong>
+                                                ${alertaBajoStock}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small mb-1">Stock Actual</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" step="0.01" class="form-control stock-actual-input"
+                                                           value="${e.stockActual}"
+                                                           data-id="${e.insumoEstacionId}"
+                                                           min="0">
+                                                    <span class="input-group-text">${unidad}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small mb-1">Stock Mínimo</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" step="0.01" class="form-control"
+                                                           value="${e.stockMinimo}" readonly>
+                                                    <span class="input-group-text">${unidad}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 text-end">
+                                                <button class="btn btn-sm btn-success btn-actualizar-stock"
+                                                        data-id="${e.insumoEstacionId}">
+                                                    <i class="bi bi-check"></i> Actualizar
+                                                </button>
+                                                <button class="btn btn-sm btn-danger btn-eliminar-asignacion"
+                                                        data-id="${e.insumoEstacionId}">
+                                                    <i class="bi bi-trash"></i> Eliminar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            container.append(card);
+                        });
+                    }
+                });
+            }
+
+            // Cargar estaciones disponibles para asignar
+            function cargarEstacionesDisponibles() {
+                $.ajax({
+                    url: '@Url.Action("ObtenerEstacionesActivas", "MantenedorInsumo")',
+                    type: "GET",
+                    success: function (estaciones) {
+                        var $select = $("#estacionId");
+                        $select.empty();
+                        $select.append('<option value="">Seleccione...</option>');
+                        estaciones.forEach(function (e) {
+                            $select.append(`<option value="${e.estacionId}">${e.nombre}</option>`);
+                        });
+                    }
+                });
+            }
+
+            // ========================================
+            // AGREGAR ESTACIÓN A INSUMO
+            // ========================================
+            $("#formAgregarEstacion").submit(function (e) {
+                e.preventDefault();
+
+                var datos = {
+                    insumoId: parseInt($("#insumoIdStock").val()),
+                    estacionId: parseInt($("#estacionId").val()),
+                    stockActual: parseFloat($("#stockActual").val()),
+                    stockMinimo: parseFloat($("#stockMinimo").val())
+                };
+
+                if (!datos.estacionId || datos.stockActual < 0 || datos.stockMinimo < 0) {
+                    alert("Complete todos los campos correctamente");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AsignarEstacion", "MantenedorInsumo")',
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(datos),
+                    success: function (res) {
+                        if (res.exito) {
+                            // Limpiar formulario
+                            $("#formAgregarEstacion")[0].reset();
+
+                            // Recargar lista de estaciones asignadas
+                            cargarEstacionesAsignadas(datos.insumoId);
+
+                            // Recargar tabla principal
+                            tabla.ajax.reload();
+
+                            alert(res.mensaje);
+                        } else {
+                            alert(res.mensaje);
+                        }
+                    },
+                    error: function () {
+                        alert("Error al asignar estación");
+                    }
+                });
+            });
+
+            // ========================================
+            // ACTUALIZAR STOCK
+            // ========================================
+            $(document).on("click", ".btn-actualizar-stock", function () {
+                var insumoEstacionId = $(this).data("id");
+                var stockActual = parseFloat($(`.stock-actual-input[data-id="${insumoEstacionId}"]`).val());
+
+                if (stockActual < 0) {
+                    alert("El stock no puede ser negativo");
+                    return;
+                }
+
+                if (confirm("¿Actualizar el stock?")) {
+                    $.ajax({
+                        url: '@Url.Action("ActualizarStock", "MantenedorInsumo")',
+                        type: "POST",
+                        data: {
+                            insumoEstacionId: insumoEstacionId,
+                            stockActual: stockActual
+                        },
+                        success: function (res) {
+                            if (res.exito) {
+                                // Recargar estaciones asignadas
+                                var insumoId = $("#insumoIdStock").val();
+                                cargarEstacionesAsignadas(insumoId);
+
+                                // Recargar tabla principal
+                                tabla.ajax.reload();
+
+                                // Feedback visual
+                                var btn = $(`.btn-actualizar-stock[data-id="${insumoEstacionId}"]`);
+                                btn.removeClass("btn-success").addClass("btn-info");
+                                setTimeout(function() {
+                                    btn.removeClass("btn-info").addClass("btn-success");
+                                }, 500);
+                            } else {
+                                alert(res.mensaje);
+                            }
+                        }
+                    });
+                }
+            });
+
+            // ========================================
+            // ELIMINAR ASIGNACIÓN
+            // ========================================
+            $(document).on("click", ".btn-eliminar-asignacion", function () {
+                var insumoEstacionId = $(this).data("id");
+
+                if (confirm("¿Eliminar esta asignación de estación?")) {
+                    $.ajax({
+                        url: '@Url.Action("EliminarAsignacion", "MantenedorInsumo")',
+                        type: "POST",
+                        data: { insumoEstacionId: insumoEstacionId },
+                        success: function (res) {
+                            alert(res.mensaje);
+                            if (res.exito) {
+                                var insumoId = $("#insumoIdStock").val();
+                                cargarEstacionesAsignadas(insumoId);
+                                tabla.ajax.reload();
+                            }
+                        }
+                    });
+                }
+            });
+
+            // ========================================
+            // ATAJO: Enter para actualizar stock
+            // ========================================
+            $(document).on("keypress", ".stock-actual-input", function (e) {
+                if (e.which === 13) { // Enter
+                    e.preventDefault();
+                    var insumoEstacionId = $(this).data("id");
+                    $(`.btn-actualizar-stock[data-id="${insumoEstacionId}"]`).click();
+                }
+            });
+
+            // ========================================
+            // ACTUALIZACIÓN AUTOMÁTICA DE ALERTAS
+            // ========================================
+            setInterval(function() {
+                tabla.ajax.reload(null, false); // Recargar sin resetear paginación
+            }, 60000); // Cada 60 segundos
+        });
+    </script>
+}
