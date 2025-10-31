@@ -1,0 +1,40 @@
+﻿<!-- Modal Mesa -->
+<div class="modal fade" id="modalMesa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalMesaLabel">Agregar Mesa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formMesa">
+                    <input type="hidden" id="mesaId" value="0" />
+
+                    <div class="mb-3">
+                        <label for="nroMesa" class="form-label">Número de Mesa</label>
+                        <input type="number"
+                               class="form-control"
+                               id="nroMesa"
+                               placeholder="Ingrese el número de mesa"
+                               min="1"
+                               required>
+                        <small class="form-text text-muted">El número de mesa debe ser único</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-select" id="estado" required>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Ocupada">Ocupada</option>
+                            <option value="Reservada">Reservada</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btnGuardar">
+                        <i class="bi bi-save"></i> Guardar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

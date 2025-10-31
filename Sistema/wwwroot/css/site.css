@@ -1,44 +1,129 @@
-html {
-  font-size: 14px;
+/* Contenedor principal */
+.container-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: white;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+/* Encabezado */
+.header-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-bottom: 25px;
+    max-width: 400px;
+    width: 90%;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.logo-login {
+    width: 280px;
+    height: 180px;
+    margin-right: 15px;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+
+/* Card del formulario */
+.card-login {
+    border: 2px solid #ff6600;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    background-color: #fff;
+    width: 400px;
+    max-width: 90%;
 }
 
-body {
-  /*margin-bottom: 60px;*/
+/* Etiquetas */
+.form-group label {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+    gap: 5px;
+}
+
+/* Inputs */
+.form-control-custom {
+    width: 100%;
+    padding: 0.5rem;
+    border: 2px solid #ff6600;
+    border-radius: 5px;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.2s;
+}
+
+    .form-control-custom:focus {
+        box-shadow: 0 0 0 0.25rem rgba(255,102,0,0.25);
+    }
+
+/* Grupo de contraseña */
+.input-group-custom {
+    display: flex;
+}
+
+.btn-toggle-password {
+    border: 2px solid #ff6600;
+    border-left: none;
+    background: white;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+}
+
+/* Checkbox */
+.form-check-custom {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+    font-size: 0.95rem;
+    gap: 5px;
+}
+
+.form-check-input-custom {
+    width: 1.2rem;
+    height: 1.2rem;
+    appearance: none;
+    border: 2px solid #ff6600;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    background-color: white;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+    .form-check-input-custom:checked {
+        background-color: #ff6600;
+        border-color: #ff6600;
+    }
+
+/* Botón */
+.btn-login {
+    width: 100%;
+    background-color: #e85c00;
+    color: white;
+    font-weight: bold;
+    border: 2px solid #e85c00;
+    border-radius: 5px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+    .btn-login:hover {
+        background-color: #c94f00;
+    }
+
+/* Enlace */
+.text-muted {
+    color: #333;
 }
 
 .main-content {
-    flex-grow: 1;
-    padding: 20px;
-    background-color: #f8f9fa;
-    overflow-y: auto;
-    height: 100vh;
-}
-
-.sidebar {
-    width: 250px;
-    flex-shrink: 0;
-    background-color: #343a40;
-    color: white;
-    min-height: 100vh;
-}
-
-.layout-container {
-    flex: 1;
-    display: flex;
-    min-height: 100vh;
+    padding: 30px 40px; /* <-- espacio interior */
 }

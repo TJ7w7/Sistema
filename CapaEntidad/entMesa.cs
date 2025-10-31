@@ -10,10 +10,6 @@ namespace CapaEntidad
     {
         public int MesaId { get; set; }
         public int NroMesa { get; set; }
-        public int ZonaId { get; set; }
-        public string NombreZona { get; set; }
         public string Estado { get; set; }
-        public decimal PosicionX { get; set; }
-        public decimal PosicionY { get; set; }
     }
 }

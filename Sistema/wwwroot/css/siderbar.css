@@ -1,0 +1,66 @@
+﻿/* ===== LOGO ===== */
+body {
+    height: calc(100vh + 200px);
+}
+
+.logo-container {
+    text-align: center;
+    padding: 10px 0;
+    transition: all 0.4s ease;
+}
+
+.logo-casablancha {
+    height: 170px;
+    width: 270px;
+    transition: all 0.4s ease;
+}
+
+.logo-hidden {
+    opacity: 0;
+    transform: translateY(-40px);
+}
+
+/* ===== MENÚ SUPERIOR ===== */
+.navbar-superior {
+    background-color: #e56717;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-superior {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-superior li {
+    margin: 0 10px;
+}
+
+.nav-superior a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 0.95rem;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.nav-superior a:hover {
+    background-color: white;
+    color: #e56717;
+}
+
+.nav-superior a.active {
+    background-color: #c6540d;
+    color: white;
+}

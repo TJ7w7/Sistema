@@ -1,152 +1,71 @@
-﻿<div class="bg-white shadow-sm" style="width: 280px; min-height: 100vh; border-right: 1px solid #e0e0e0;">
-    <!-- Header del Usuario -->
-    <div class="p-4 border-bottom">
-        <div class="d-flex align-items-center">
-            <div class="position-relative">
-                <img src="https://via.placeholder.com/50" class="rounded-circle" alt="Usuario" style="width: 50px; height: 50px; object-fit: cover;">
-                <span class="position-absolute bottom-0 end-0 bg-success rounded-circle" style="width: 12px; height: 12px; border: 2px solid white;"></span>
-            </div>
-            <div class="ms-3 flex-grow-1">
-                <h6 class="mb-0 fw-semibold">@User.Identity?.Name ?? "Invitado"</h6>
-                <small class="text-muted">Administrador</small>
-            </div>
-        </div>
-    </div>
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
 
-    <!-- Menú de Navegación -->
-    <nav class="py-3">
-        <ul class="nav flex-column px-2">
-            <li class="nav-item mb-1">
-                <a asp-controller="Home" asp-action="Index" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    @* <i class="bi bi-speedometer2 me-3 fs-5"></i> *@
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a asp-controller="MantenedorUsuario" asp-action="ListarUsuarios" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    @* <i class="bi bi-people me-3 fs-5"></i> *@
-                    <span>Usuarios</span>
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a asp-controller="MantenedorProducto" asp-action="ListarProductos" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    @* <i class="bi bi-box-seam me-3 fs-5"></i> *@
-                    <span>Productos</span>
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a asp-controller="MantenedorCategoria" asp-action="ListarCategorias" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    @* <i class="bi bi-shield-check me-3 fs-5"></i> *@
-                    <span>Categoria</span>
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a asp-controller="MantenedorInsumo" asp-action="ListarInsumos" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    @* <i class="bi bi-shield-check me-3 fs-5"></i> *@
-                    <span>Insumos</span>
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a asp-controller="MantenedorZona" asp-action="ListarZonasMesas" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    @* <i class="bi bi-shield-check me-3 fs-5"></i> *@
-                    <span>Mesas</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-
-    <!-- Footer del Sidebar -->
-    @* <div class="position-absolute bottom-0 w-100 p-3 border-top">
-        <form asp-controller="Home" asp-action="Index" method="post">
-            <button type="submit" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center">
-                <i class="bi bi-box-arrow-right me-2"></i>
-                Cerrar Sesión
-            </button>
-        </form>
-    </div> *@
+<!-- LOGO -->
+<div id="logoContainer" class="logo-container">
+    <img src="~/images/logo-poroto.png" alt="Logo Casa Blanca" class="logo-casablancha">
 </div>
 
-@* <div class="bg-white shadow-sm" style="width: 280px; min-height: 100vh; border-right: 1px solid #e0e0e0;">
-    <!-- Header del Usuario -->
-    <div class="p-4 border-bottom">
-        <div class="d-flex align-items-center">
-            <div class="position-relative">
-                <img src="https://via.placeholder.com/50" class="rounded-circle" alt="Usuario" style="width: 50px; height: 50px; object-fit: cover;">
-                <span class="position-absolute bottom-0 end-0 bg-success rounded-circle" style="width: 12px; height: 12px; border: 2px solid white;"></span>
-            </div>
-            <div class="ms-3 flex-grow-1">
-                <h6 class="mb-0 fw-semibold">@User.Identity?.Name ?? "Invitado"</h6>
-                <small class="text-muted">@User.FindFirst(ClaimTypes.Role)?.Value</small>
-            </div>
-        </div>
-    </div>
+<!-- Barra de Navegación Superior -->
+<nav class="navbar-superior">
+    <ul class="nav-superior">
+        <li>
+            <a asp-controller="MantenedorUsuario" asp-action="ListarUsuarios"
+               class="@(currentController == "MantenedorUsuario" ? "active" : "")">USUARIOS</a>
+        </li>
+        <li>
+            <a asp-controller="MantenedorProducto" asp-action="ListarProductos"
+               class="@(currentController == "MantenedorProducto" ? "active" : "")">CARTA</a>
+        </li>
+        <li>
+            <a asp-controller="MantenedorCategoria" asp-action="ListarCategorias"
+               class="@(currentController == "MantenedorCategoria" ? "active" : "")">CATEGORIAS</a>
+        </li>
+        <li>
+            <a asp-controller="MantenedorInsumo" asp-action="ListarInsumos"
+               class="@(currentController == "MantenedorInsumo" ? "active" : "")">INSUMOS</a>
+        </li>
+        <li>
+            <a asp-controller="MantenedorMesa" asp-action="ListarMesas"
+               class="@(currentController == "MantenedorMesa" ? "active" : "")">MESAS</a>
+        </li>
+    </ul>
 
-    <!-- Menú de Navegación -->
-    <nav class="py-3">
-        <ul class="nav flex-column px-2">
-            <li class="nav-item mb-1">
-                <a asp-controller="Home" asp-action="Index" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    <i class="bi bi-speedometer2 me-3 fs-5"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a asp-controller="MantenedorUsuario" asp-action="ListarUsuarios" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    <i class="bi bi-people me-3 fs-5"></i>
-                    <span>Usuarios</span>
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a asp-controller="MantenedorProducto" asp-action="ListarProductos" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    <i class="bi bi-box-seam me-3 fs-5"></i>
-                    <span>Productos</span>
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a asp-controller="MantenedorCategoria" asp-action="ListarCategorias" class="nav-link d-flex align-items-center rounded px-3 py-2 text-dark">
-                    <i class="bi bi-shield-check me-3 fs-5"></i>
-                    <span>Categoria</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-
-    <!-- Footer del Sidebar -->
-    <div class="position-absolute bottom-0 w-100 p-3 border-top">
-        <form asp-controller="Account" asp-action="Logout" method="post">
-            <button type="submit" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center">
-                <i class="bi bi-box-arrow-right me-2"></i>
-                Cerrar Sesión
-            </button>
+    <!-- Botón de Salir -->
+    <div class="logout-container">
+        <form asp-controller="Home" asp-action="Logout" method="post" class="logout-form">
+            <button type="submit" class="btn-logout">Salir</button>
         </form>
     </div>
-</div> *@
+</nav>
 
-<style>
-    .nav-link {
-        transition: all 0.2s ease;
-    }
+<link rel="stylesheet" href="~/css/siderbar.css" />
 
-        .nav-link:hover {
-            background-color: #f8f9fa;
-            color: #0d6efd !important;
+<script>
+    let scrolled = false;
+
+    window.addEventListener('scroll', function () {
+        const logo = document.getElementById('logoContainer');
+        const navbar = document.querySelector('.navbar-superior');
+
+        if (window.scrollY > 50 && !scrolled) {
+            logo.classList.add('logo-hidden');
+            scrolled = true;
+
+            // Desplazar suavemente hacia la barra
+            navbar.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        } else if (window.scrollY <= 50) {
+            logo.classList.remove('logo-hidden');
+            scrolled = false;
         }
+    });
+</script>
 
-        .nav-link.active {
-            background-color: #0d6efd;
-            color: white !important;
-        }
 
-            .nav-link.active i {
-                color: white;
-            }
 
-        .nav-link i {
-            color: #6c757d;
-            transition: color 0.2s ease;
-        }
 
-        .nav-link:hover i {
-            color: #0d6efd;
-        }
-</style>
+

@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Mozo";
+    Layout = "~/Views/Shared/_LayoutMozo.cshtml";
+}
+<div class="contenedor-pedidos">
+    <!-- Encabezado -->
+    <div class="encabezado">
+        <span class="nombre-mesero">@ViewBag.NombreMesero</span>
+        <div class="acciones-superior">
+            <button class="btn-accion" onclick="volverAtras()">
+                <i class="bi bi-arrow-left-short"></i>
+            </button>
+            <button class="btn-accion" onclick="agregarNuevo()">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Título -->
+    <div class="titulo-seccion">Mesas</div>
+
+    <!-- Botones de acción -->
+    <div class="botones-acciones">
+        <button class="btn-circular" onclick="buscarMesa()">
+            <i class="bi bi-search"></i>
+        </button>
+        <button class="btn-circular" onclick="nuevoPedido()">
+            <i class="bi bi-plus"></i>
+        </button>
+        <button class="btn-circular" onclick="refrescarMesas()">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <button class="btn-circular" onclick="verHistorial()">
+            <i class="bi bi-journal-text"></i>
+        </button>
+    </div>
+
+    <!-- Contenedor de mesas (se llenará dinámicamente) -->
+    <div class="grid-pedidos" id="contenedorMesas">
+        <!-- Las mesas se cargarán aquí -->
+        <div class="loading-container">
+            <p>Cargando mesas...</p>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="~/css/mozo.css" />
+
+<script>
+    console.log('Script cargado');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM cargado, iniciando carga de mesas...');
+        cargarMesas();
+    });
+
+    function cargarMesas() {
+        const url = '@Url.Action("ObtenerMesasActivas", "Mozo")';
+
+        fetch(url)
+            .then(response => response.json())
+            .then(result => {
+                console.log('Resultado:', result);
+                if (result.success) {
+                    console.log('Mesas recibidas:', result.data.length);
+                    mostrarMesas(result.data);
+                } else {
+                    mostrarError(result.mensaje || 'Error desconocido');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarError('Error al cargar las mesas');
+            });
+    }
+
+    function mostrarMesas(mesas) {
+        const contenedor = document.getElementById('contenedorMesas');
+
+        if (!mesas || mesas.length === 0) {
+            contenedor.innerHTML = '<div class="sin-datos"><p>No hay mesas registradas</p></div>';
+            return;
+        }
+
+        let html = '';
+        mesas.forEach(mesa => {
+            const estadoClass = obtenerClaseEstado(mesa.estado);
+            const estadoTexto = obtenerTextoEstado(mesa.estado);
+
+            html += `
+                <div class="pedido ${estadoClass}" onclick="seleccionarMesa(${mesa.mesaId}, ${mesa.nroMesa})">
+                    <p><strong>Mesa ${mesa.nroMesa}</strong></p>
+                    <p class="estado-mesa">${estadoTexto}</p>
+                </div>
+            `;
+        });
+
+        contenedor.innerHTML = html;
+    }
+
+    function obtenerClaseEstado(estado) {
+        if (!estado) return 'mesa-disponible';
+
+        switch(estado.toLowerCase().trim()) {
+            case 'disponible':
+                return 'mesa-disponible';
+            case 'ocupada':
+            case 'ocupado':
+                return 'mesa-ocupada';
+            default:
+                return 'mesa-disponible';
+        }
+    }
+
+    function obtenerTextoEstado(estado) {
+        if (!estado) return 'Disponible';
+        return estado.charAt(0).toUpperCase() + estado.slice(1).toLowerCase();
+    }
+
+    function seleccionarMesa(mesaId, nroMesa) {
+        console.log('Mesa seleccionada:', mesaId, nroMesa);
+        // Redirigir a crear pedido
+        window.location.href = `@Url.Action("CrearPedido", "Pedido")?mesaId=${mesaId}&nroMesa=${nroMesa}`;
+    }
+
+    function refrescarMesas() {
+        cargarMesas();
+    }
+
+    function mostrarError(mensaje) {
+        const contenedor = document.getElementById('contenedorMesas');
+        contenedor.innerHTML = `
+            <div class="error-container">
+                <p class="error-mensaje">${mensaje}</p>
+                <button class="btn-reintentar" onclick="cargarMesas()">Reintentar</button>
+            </div>
+        `;
+    }
+
+    // Funciones de botones
+    function volverAtras() {
+        window.history.back();
+    }
+
+    function agregarNuevo() {
+        alert('Agregar nuevo');
+    }
+
+    function buscarMesa() {
+        alert('Buscar mesa');
+    }
+
+    function nuevoPedido() {
+        alert('Nuevo pedido');
+    }
+
+    function verHistorial() {
+        alert('Ver historial');
+    }
+</script>

@@ -1,0 +1,211 @@
+﻿/* ===== CONTENEDOR GENERAL ===== */
+.contenedor-pedidos {
+    max-width: 600px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* ===== ENCABEZADO ===== */
+.encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #e56717;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.nombre-mesero {
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.acciones-superior {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-accion {
+    background-color: #e56717;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* ===== TÍTULO ===== */
+.titulo-seccion {
+    background-color: #e56717;
+    color: white;
+    text-align: center;
+    padding: 6px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+/* ===== BOTONES DE ACCIÓN ===== */
+.botones-acciones {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+}
+
+.btn-circular {
+    background-color: #e56717;
+    border: none;
+    color: white;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+    .btn-circular:hover {
+        background-color: #c6540d;
+    }
+
+/* ===== TARJETAS ===== */
+.grid-pedidos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.pedido {
+    border: 2px solid #e56717;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    font-size: 0.85rem;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+    .pedido:hover {
+        transform: scale(1.03);
+        background-color: #fff4ec;
+    }
+
+/* ===== RESPONSIVE ===== */
+
+/* Pantallas grandes (tablets y PCs) */
+@media (min-width: 768px) {
+    .contenedor-pedidos {
+        max-width: 900px;
+        padding: 20px;
+    }
+
+    .grid-pedidos {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .btn-circular, .btn-accion {
+        width: 36px;
+        height: 36px;
+    }
+
+    .pedido {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    .grid-pedidos {
+        grid-template-columns: repeat(2, 1fr); /* se mantiene igual que tu diseño original */
+    }
+
+    .contenedor-pedidos {
+        width: 95%;
+        padding: 10px;
+    }
+}
+
+/* ===== ESTADOS DE MESA ===== */
+.mesa-disponible {
+    border-color: #28a745;
+}
+
+    .mesa-disponible:hover {
+        background-color: #e8f5e9;
+    }
+
+.mesa-ocupada {
+    border-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+.mesa-reservada {
+    border-color: #ffc107;
+    background-color: #fffbf0;
+}
+
+.estado-mesa {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* ===== BOTÓN VER DETALLE ===== */
+.btn-ver-detalle {
+    background-color: #e56717;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-top: 6px;
+}
+
+    .btn-ver-detalle:hover {
+        background-color: #c6540d;
+    }
+
+/* ===== MENSAJES ===== */
+.loading-container,
+.sin-datos,
+.error-container {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+}
+
+.error-mensaje {
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.btn-reintentar {
+    background-color: #e56717;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    .btn-reintentar:hover {
+        background-color: #c6540d;
+    }
+
+/* ===== CURSOR POINTER EN MESAS ===== */
+.pedido {
+    cursor: pointer;
+}

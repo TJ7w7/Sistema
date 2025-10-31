@@ -22,9 +22,24 @@ namespace Sistema.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("ListarUsuarios", "MantenedorUsuario");
+                // Obtener el rol del usuario autenticado
+                var rol = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+                // Redirigir según el rol
+                return RedirectBasedOnRole(rol);
             }
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Limpia sesión (solo si la usas)
+            HttpContext.Session?.Clear();
+
+            return RedirectToAction("Index", "Home");
         }
 
         // POST: Home/Index - Procesar Login
@@ -95,10 +110,13 @@ namespace Sistema.Controllers
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
 
-                _logger.LogInformation($"Login exitoso: {usuario.UserName} - Rol: {usuario.Rol}");
+                //_logger.LogInformation($"Login exitoso: {usuario.UserName} - Rol: {usuario.Rol}");
 
-                // Redirigir según el rol
-                return RedirectBasedOnRole(usuario.Rol);
+                //// Redirigir según el rol
+                //return RedirectBasedOnRole(usuario.Rol);
+                var resultado = RedirectBasedOnRole(usuario.Rol);
+                return resultado;
+
             }
             catch (Exception ex)
             {
@@ -143,9 +161,8 @@ namespace Sistema.Controllers
                 case "ADMIN":
                     return RedirectToAction("ListarUsuarios", "MantenedorUsuario");
 
-                case "OPERADOR":
-                case "SUPERVISOR":
-                    return RedirectToAction("Dashboard");
+                case "MOZO":
+                    return RedirectToAction("Mozo", "Mozo");
 
                 default:
                     return RedirectToAction("Dashboard");

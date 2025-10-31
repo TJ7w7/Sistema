@@ -19,7 +19,7 @@ namespace CapaDatos
         }
         #endregion
 
-        // Actualizar método ListarMesas
+        // Listar todas las Mesas activas
         public List<entMesa> ListarMesas()
         {
             SqlCommand cmd = null;
@@ -39,11 +39,7 @@ namespace CapaDatos
                     {
                         MesaId = Convert.ToInt32(dr["MesaId"]),
                         NroMesa = Convert.ToInt32(dr["NroMesa"]),
-                        ZonaId = Convert.ToInt32(dr["ZonaId"]),
-                        NombreZona = dr["NombreZona"].ToString(),
-                        Estado = dr["Estado"].ToString(),
-                        PosicionX = Convert.ToInt32(dr["PosicionX"]),
-                        PosicionY = Convert.ToInt32(dr["PosicionY"])
+                        Estado = dr["Estado"].ToString()
                     };
                     lista.Add(m);
                 }
@@ -60,8 +56,8 @@ namespace CapaDatos
             return lista;
         }
 
-        // Actualizar método ListarMesasPorZona
-        public List<entMesa> ListarMesasPorZona(int zonaId)
+        // Listar todas las Mesas (incluye eliminadas)
+        public List<entMesa> ListarMesasTodo()
         {
             SqlCommand cmd = null;
             List<entMesa> lista = new List<entMesa>();
@@ -69,9 +65,8 @@ namespace CapaDatos
             try
             {
                 SqlConnection cn = Conexion.Instancia.Conectar();
-                cmd = new SqlCommand("sp_ListarMesasPorZona", cn);
+                cmd = new SqlCommand("sp_ListarMesasTodo", cn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@ZonaId", zonaId);
                 cn.Open();
 
                 SqlDataReader dr = cmd.ExecuteReader();
@@ -81,10 +76,7 @@ namespace CapaDatos
                     {
                         MesaId = Convert.ToInt32(dr["MesaId"]),
                         NroMesa = Convert.ToInt32(dr["NroMesa"]),
-                        ZonaId = Convert.ToInt32(dr["ZonaId"]),
-                        Estado = dr["Estado"].ToString(),
-                        PosicionX = Convert.ToInt32(dr["PosicionX"]),
-                        PosicionY = Convert.ToInt32(dr["PosicionY"])
+                        Estado = dr["Estado"].ToString()
                     };
                     lista.Add(m);
                 }
@@ -101,7 +93,7 @@ namespace CapaDatos
             return lista;
         }
 
-        // Actualizar método InsertarMesa
+        // Insertar Mesa
         public int InsertarMesa(entMesa mesa)
         {
             SqlCommand cmd = null;
@@ -113,9 +105,6 @@ namespace CapaDatos
                 cmd = new SqlCommand("sp_InsertarMesa", cn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@NroMesa", mesa.NroMesa);
-                cmd.Parameters.AddWithValue("@ZonaId", mesa.ZonaId);
-                cmd.Parameters.AddWithValue("@PosicionX", mesa.PosicionX);
-                cmd.Parameters.AddWithValue("@PosicionY", mesa.PosicionY);
 
                 SqlParameter paramNuevoId = new SqlParameter("@NuevoId", SqlDbType.Int);
                 paramNuevoId.Direction = ParameterDirection.Output;
@@ -137,7 +126,7 @@ namespace CapaDatos
             return nuevoId;
         }
 
-        // Actualizar método ActualizarMesa
+        // Actualizar Mesa
         public bool ActualizarMesa(entMesa mesa)
         {
             SqlCommand cmd = null;
@@ -168,37 +157,7 @@ namespace CapaDatos
             return actualiza;
         }
 
-        // Agregar este método en datMesa.cs
-        public bool ActualizarPosicionMesa(int mesaId, decimal posicionX, decimal posicionY)
-        {
-            SqlCommand cmd = null;
-            bool actualiza = false;
-
-            try
-            {
-                SqlConnection cn = Conexion.Instancia.Conectar();
-                cmd = new SqlCommand("sp_ActualizarPosicionMesa", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@MesaId", mesaId);
-                cmd.Parameters.AddWithValue("@PosicionX", posicionX);
-                cmd.Parameters.AddWithValue("@PosicionY", posicionY);
-                cn.Open();
-
-                int filas = cmd.ExecuteNonQuery();
-                if (filas > 0) actualiza = true;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-            finally
-            {
-                cmd.Connection.Close();
-            }
-
-            return actualiza;
-        }
-
+        // Eliminar Mesa (lógica)
         public bool EliminarMesa(int mesaId)
         {
             SqlCommand cmd = null;

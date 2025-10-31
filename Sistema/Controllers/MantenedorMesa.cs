@@ -2,22 +2,17 @@
 using CapaLogica;
 using Microsoft.AspNetCore.Mvc;
 
-// Modelo simple para recibir las coordenadas
-public class PosicionMesaModel
-{
-    public int MesaId { get; set; }
-    public int PosicionX { get; set; }
-    public int PosicionY { get; set; }
-}
-
 namespace Sistema.Controllers
 {
     public class MantenedorMesa : Controller
     {
+        // Vista principal
         public IActionResult ListarMesas()
         {
             return View();
         }
+
+        // Obtener todas las mesas activas
         [HttpGet]
         public JsonResult ObtenerMesas()
         {
@@ -32,12 +27,13 @@ namespace Sistema.Controllers
             }
         }
 
+        // Obtener todas las mesas (incluye eliminadas)
         [HttpGet]
-        public JsonResult ListarMesasPorZona(int zonaId)
+        public JsonResult ObtenerMesasTodo()
         {
             try
             {
-                var lista = logMesa.Instancia.ListarMesasPorZona(zonaId);
+                var lista = logMesa.Instancia.ListarMesasTodo();
                 return Json(new { data = lista });
             }
             catch (Exception ex)
@@ -46,6 +42,7 @@ namespace Sistema.Controllers
             }
         }
 
+        // Guardar mesa (insertar o actualizar)
         [HttpPost]
         public JsonResult GuardarMesa([FromBody] entMesa mesa)
         {
@@ -68,21 +65,7 @@ namespace Sistema.Controllers
             }
         }
 
-
-        [HttpPost]
-        public JsonResult ActualizarPosicion(int mesaId, decimal posicionX, decimal posicionY)
-        {
-            try
-            {
-                bool resultado = logMesa.Instancia.ActualizarPosicionMesa(mesaId, posicionX, posicionY);
-                return Json(new { resultado = resultado, mensaje = "Posición actualizada" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { resultado = false, mensaje = "Error: " + ex.Message });
-            }
-        }
-
+        // Eliminar mesa (lógica)
         [HttpPost]
         public JsonResult EliminarMesa(int mesaId)
         {

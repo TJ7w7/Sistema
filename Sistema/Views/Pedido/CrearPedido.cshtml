@@ -1,0 +1,398 @@
+﻿@{
+    ViewData["Title"] = "Nuevo Pedido";
+    Layout = "~/Views/Shared/_LayoutMozo.cshtml";
+}
+
+<div class="contenedor-pedido">
+    <!-- Encabezado -->
+    <div class="encabezado-pedido">
+        <button class="btn-volver" onclick="volverMesas()">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <div class="info-pedido">
+            <h2>Mesa @ViewBag.NroMesa</h2>
+            <p>@ViewBag.NombreMesero</p>
+        </div>
+        <button class="btn-finalizar" onclick="confirmarPedido()">
+            <i class="bi bi-check-lg"></i>
+        </button>
+    </div>
+
+    <!-- Buscador y Filtros -->
+    <div class="controles-productos">
+        <div class="buscador">
+            <i class="bi bi-search"></i>
+            <input type="text" id="inputBuscar" placeholder="Buscar producto..." onkeyup="buscarProducto()">
+        </div>
+        <div class="filtros-categoria" id="filtrosCategoria">
+            <button class="btn-categoria active" data-categoria="0" onclick="filtrarCategoria(0)">
+                Todos
+            </button>
+            <!-- Las categorías se cargarán dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Grid de Productos -->
+    <div class="grid-productos" id="gridProductos">
+        <div class="loading-container">
+            <p>Cargando productos...</p>
+        </div>
+    </div>
+
+    <!-- Carrito Flotante -->
+    <div class="carrito-flotante" id="carritoFlotante">
+        <div class="carrito-header">
+            <h3>Carrito</h3>
+            <button class="btn-limpiar" onclick="limpiarCarrito()">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="carrito-items" id="carritoItems">
+            <p class="carrito-vacio">No hay productos agregados</p>
+        </div>
+        <div class="carrito-total">
+            <span>TOTAL:</span>
+            <span id="totalCarrito">S/ 0.00</span>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para seleccionar variante -->
+<div class="modal-overlay" id="modalVariante">
+    <div class="modal-variante">
+        <div class="modal-header">
+            <h3 id="modalTitulo">Seleccionar Tamaño</h3>
+            <button class="btn-cerrar-modal" onclick="cerrarModalVariante()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="producto-info">
+                <img id="modalImagen" src="" alt="">
+                <h4 id="modalNombre"></h4>
+                <p id="modalDescripcion"></p>
+            </div>
+            <div class="variantes-lista" id="variantesLista">
+                <!-- Las variantes se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="~/css/crear-pedido.css" />
+
+<script>
+    // Variables globales
+    let productos = [];
+    let categorias = [];
+    let carrito = [];
+    let productoSeleccionado = null;
+    const mesaId = @ViewBag.MesaId;
+
+    // Cargar datos al iniciar
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarProductos();
+    });
+
+    // Cargar productos
+    function cargarProductos() {
+        fetch('@Url.Action("ObtenerProductosActivos", "Pedido")')
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    productos = result.data;
+                    extraerCategorias();
+                    mostrarProductos(productos);
+                } else {
+                    mostrarError(result.mensaje);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarError('Error al cargar productos');
+            });
+    }
+
+    // Extraer categorías únicas
+    function extraerCategorias() {
+        const categoriasUnicas = [...new Map(productos.map(p => [p.categoriaId, {id: p.categoriaId, nombre: p.nombreCategoria}])).values()];
+        categorias = categoriasUnicas;
+        mostrarCategorias();
+    }
+
+    // Mostrar botones de categorías
+    function mostrarCategorias() {
+        const contenedor = document.getElementById('filtrosCategoria');
+        let html = '<button class="btn-categoria active" data-categoria="0" onclick="filtrarCategoria(0)">Todos</button>';
+
+        categorias.forEach(cat => {
+            html += `<button class="btn-categoria" data-categoria="${cat.id}" onclick="filtrarCategoria(${cat.id})">${cat.nombre}</button>`;
+        });
+
+        contenedor.innerHTML = html;
+    }
+
+    // Mostrar productos
+    function mostrarProductos(listaProductos) {
+        const contenedor = document.getElementById('gridProductos');
+
+        if (listaProductos.length === 0) {
+            contenedor.innerHTML = '<div class="sin-productos"><p>No hay productos disponibles</p></div>';
+            return;
+        }
+
+        let html = '';
+        listaProductos.forEach(prod => {
+            // Construir URL de imagen igual que en la tabla de productos
+            const imagenUrl = prod.imagen ? '@Url.Action("Producto", "Imagen")?nombre=' + prod.imagen : '';
+
+            html += `
+                <div class="producto-card" onclick='abrirModalVariante(${JSON.stringify(prod).replace(/'/g, "&apos;")})'>
+                    <div class="producto-imagen">
+                        ${imagenUrl ?
+                            `<img src="${imagenUrl}" alt="${prod.nombre}" onerror="this.style.display='none'">` :
+                            '<span class="text-muted">Sin imagen</span>'
+                        }
+                    </div>
+                    <div class="producto-info-card">
+                        <h4>${prod.nombre}</h4>
+                        <p class="producto-descripcion">${prod.descripcion || ''}</p>
+                        <p class="producto-categoria">${prod.nombreCategoria}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        contenedor.innerHTML = html;
+    }
+
+    // Filtrar por categoría
+    function filtrarCategoria(categoriaId) {
+        // Actualizar botones activos
+        document.querySelectorAll('.btn-categoria').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Filtrar productos
+        if (categoriaId === 0) {
+            mostrarProductos(productos);
+        } else {
+            const productosFiltrados = productos.filter(p => p.categoriaId === categoriaId);
+            mostrarProductos(productosFiltrados);
+        }
+    }
+
+    // Buscar producto
+    function buscarProducto() {
+        const termino = document.getElementById('inputBuscar').value.toLowerCase();
+        const productosFiltrados = productos.filter(p =>
+            p.nombre.toLowerCase().includes(termino) ||
+            (p.descripcion && p.descripcion.toLowerCase().includes(termino))
+        );
+        mostrarProductos(productosFiltrados);
+    }
+
+    // Abrir modal de variantes
+    function abrirModalVariante(producto) {
+        productoSeleccionado = producto;
+        document.getElementById('modalNombre').textContent = producto.nombre;
+        document.getElementById('modalDescripcion').textContent = producto.descripcion || '';
+
+        // Construir URL de imagen igual que en la tabla
+        const imgModal = document.getElementById('modalImagen');
+        if (producto.imagen) {
+            imgModal.src = '@Url.Action("Producto", "Imagen")?nombre=' + producto.imagen;
+            imgModal.style.display = 'block';
+            imgModal.onerror = function() { this.style.display = 'none'; };
+        } else {
+            imgModal.style.display = 'none';
+        }
+
+        const contenedor = document.getElementById('variantesLista');
+        let html = '';
+
+        if (producto.variantes && producto.variantes.length > 0) {
+            producto.variantes.forEach(variante => {
+                html += `
+                    <button class="btn-variante" onclick="agregarAlCarrito(${variante.varianteId}, '${variante.tamaño}', ${variante.precio})">
+                        <span>${variante.tamaño}</span>
+                        <span class="precio">S/ ${variante.precio.toFixed(2)}</span>
+                    </button>
+                `;
+            });
+        } else {
+            html = '<p class="sin-variantes">Este producto no tiene variantes disponibles</p>';
+        }
+
+        contenedor.innerHTML = html;
+        document.getElementById('modalVariante').classList.add('show');
+    }
+
+    // Cerrar modal
+    function cerrarModalVariante() {
+        document.getElementById('modalVariante').classList.remove('show');
+        productoSeleccionado = null;
+    }
+
+    // Agregar al carrito
+    function agregarAlCarrito(varianteId, tamaño, precio) {
+        const item = {
+            varianteId: varianteId,
+            nombreProducto: productoSeleccionado.nombre,
+            tamaño: tamaño,
+            precio: precio,
+            cantidad: 1
+        };
+
+        // Verificar si ya existe en el carrito
+        const index = carrito.findIndex(i => i.varianteId === varianteId);
+
+        if (index >= 0) {
+            carrito[index].cantidad++;
+        } else {
+            carrito.push(item);
+        }
+
+        actualizarCarrito();
+        cerrarModalVariante();
+    }
+
+    // Actualizar vista del carrito
+    function actualizarCarrito() {
+        const contenedor = document.getElementById('carritoItems');
+
+        if (carrito.length === 0) {
+            contenedor.innerHTML = '<p class="carrito-vacio">No hay productos agregados</p>';
+            document.getElementById('totalCarrito').textContent = 'S/ 0.00';
+            return;
+        }
+
+        let html = '';
+        let total = 0;
+
+        carrito.forEach((item, index) => {
+            const subtotal = item.precio * item.cantidad;
+            total += subtotal;
+
+            html += `
+                <div class="carrito-item">
+                    <div class="item-info">
+                        <h5>${item.nombreProducto}</h5>
+                        <p>${item.tamaño} - S/ ${item.precio.toFixed(2)}</p>
+                    </div>
+                    <div class="item-controles">
+                        <button onclick="cambiarCantidad(${index}, -1)">-</button>
+                        <span>${item.cantidad}</span>
+                        <button onclick="cambiarCantidad(${index}, 1)">+</button>
+                    </div>
+                    <div class="item-subtotal">
+                        <span>S/ ${subtotal.toFixed(2)}</span>
+                        <button class="btn-eliminar-item" onclick="eliminarItem(${index})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        contenedor.innerHTML = html;
+        document.getElementById('totalCarrito').textContent = 'S/ ' + total.toFixed(2);
+    }
+
+    // Cambiar cantidad
+    function cambiarCantidad(index, cambio) {
+        carrito[index].cantidad += cambio;
+
+        if (carrito[index].cantidad <= 0) {
+            carrito.splice(index, 1);
+        }
+
+        actualizarCarrito();
+    }
+
+    // Eliminar item
+    function eliminarItem(index) {
+        carrito.splice(index, 1);
+        actualizarCarrito();
+    }
+
+    // Limpiar carrito
+    function limpiarCarrito() {
+        if (confirm('¿Está seguro de limpiar el carrito?')) {
+            carrito = [];
+            actualizarCarrito();
+        }
+    }
+
+    // Confirmar pedido
+    function confirmarPedido() {
+        if (carrito.length === 0) {
+            alert('Debe agregar al menos un producto al pedido');
+            return;
+        }
+
+        if (!confirm('¿Confirmar pedido?')) {
+            return;
+        }
+
+        // Preparar datos del pedido
+        const detalles = carrito.map(item => ({
+            varianteId: item.varianteId,
+            cantidad: item.cantidad,
+            precioUnitario: item.precio,
+            subTotal: item.precio * item.cantidad
+        }));
+
+        const total = detalles.reduce((sum, d) => sum + d.subTotal, 0);
+
+        const pedido = {
+            mesaId: mesaId,
+            precioTotal: total,
+            detalles: detalles
+        };
+
+        // Enviar pedido
+        fetch('@Url.Action("GuardarPedido", "Pedido")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(pedido)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('Pedido registrado correctamente');
+                window.location.href = '@Url.Action("Index", "Mozo")';
+            } else {
+                alert('Error: ' + result.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al guardar el pedido');
+        });
+    }
+
+    // Volver a mesas
+    function volverMesas() {
+        if (carrito.length > 0) {
+            if (!confirm('¿Está seguro de salir? Se perderán los cambios no guardados')) {
+                return;
+            }
+        }
+        window.location.href = '@Url.Action("Mozo", "Mozo")';
+    }
+
+    // Mostrar error
+    function mostrarError(mensaje) {
+        const contenedor = document.getElementById('gridProductos');
+        contenedor.innerHTML = `
+            <div class="error-container">
+                <p class="error-mensaje">${mensaje}</p>
+                <button class="btn-reintentar" onclick="cargarProductos()">Reintentar</button>
+            </div>
+        `;
+    }
+</script>

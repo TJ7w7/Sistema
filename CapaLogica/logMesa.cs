@@ -19,7 +19,7 @@ namespace CapaLogica
         #endregion
 
         #region Métodos
-
+        // Listar mesas activas
         public List<entMesa> ListarMesas()
         {
             try
@@ -32,18 +32,20 @@ namespace CapaLogica
             }
         }
 
-        public List<entMesa> ListarMesasPorZona(int zonaId)
+        // Listar todas las mesas (incluye eliminadas)
+        public List<entMesa> ListarMesasTodo()
         {
             try
             {
-                return datMesa.Instancia.ListarMesasPorZona(zonaId);
+                return datMesa.Instancia.ListarMesasTodo();
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al listar mesas por zona: " + ex.Message);
+                throw new Exception("Error al listar todas las mesas: " + ex.Message);
             }
         }
 
+        // Insertar mesa
         public int InsertarMesa(entMesa m)
         {
             try
@@ -56,6 +58,7 @@ namespace CapaLogica
             }
         }
 
+        // Actualizar mesa
         public bool ActualizarMesa(entMesa m)
         {
             try
@@ -68,18 +71,7 @@ namespace CapaLogica
             }
         }
 
-        public bool ActualizarPosicionMesa(int mesaId, decimal posicionX, decimal posicionY)
-        {
-            try
-            {
-                return datMesa.Instancia.ActualizarPosicionMesa(mesaId, posicionX, posicionY);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al actualizar posición: " + ex.Message);
-            }
-        }
-
+        // Eliminar mesa (lógica)
         public bool EliminarMesa(int mesaId)
         {
             try
@@ -91,7 +83,6 @@ namespace CapaLogica
                 throw new Exception("Error al eliminar mesa: " + ex.Message);
             }
         }
-
         #endregion
     }
 }

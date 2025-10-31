@@ -106,6 +106,10 @@ namespace CapaLogica
         {
             try
             {
+                if (!string.IsNullOrWhiteSpace(u.Pass))
+                {
+                    u.Pass = Recursos.EncriptarSHA256(u.Pass);
+                }
                 return datUsuario.Instancia.EditarUsuario(u);
             }
             catch (Exception ex)
@@ -113,6 +117,19 @@ namespace CapaLogica
                 throw new Exception("Error al editar usuario", ex);
             }
         }
+
+
+        //public bool EditarUsuario(entUsuario u)
+        //{
+        //    try
+        //    {
+        //        return datUsuario.Instancia.EditarUsuario(u);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception("Error al editar usuario", ex);
+        //    }
+        //}
 
         //public bool CambiarEstadoUsuario(int id, bool estado)
         //{

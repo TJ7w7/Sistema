@@ -11,9 +11,18 @@ namespace CapaEntidad
     {
         public int PedidoId { get; set; }
         public int MesaId { get; set; }
+        public int NroMesa { get; set; }
         public int UsuarioId { get; set; }
-        public DateFormat Fecha { get; set; }
+        public string NombreMozo { get; set; }
+        public DateTime Fecha { get; set; }
         public decimal PrecioTotal { get; set; }
-        public bool Esstado { get; set; }
+        public bool Estado { get; set; }
+        public int CantidadItems { get; set; }
+        public List<entDetallePedido> Detalles { get; set; }
+
+        public entPedido()
+        {
+            Detalles = new List<entDetallePedido>();
+        }
     }
 }

@@ -141,6 +141,7 @@ namespace CapaDatos
         }
 
         // LISTAR PRODUCTOS ACTIVOS
+        // LISTAR PRODUCTOS ACTIVOS (CON VARIANTES)
         public List<entProducto> ListarProductosActivos()
         {
             SqlCommand cmd = null;
@@ -168,6 +169,10 @@ namespace CapaDatos
                         Imagen = dr["Imagen"].ToString(),
                         Estado = Convert.ToBoolean(dr["Estado"])
                     };
+
+                    // Cargar variantes usando el SP que ya tienes
+                    p.Variantes = datProductoVariante.Instancia.ListarVariantesPorProducto(p.ProductoId);
+
                     lista.Add(p);
                 }
             }
