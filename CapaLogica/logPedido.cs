@@ -190,6 +190,92 @@ namespace CapaLogica
             }
         }
 
+        // Obtener pedido por mesa
+        public entPedido ObtenerPedidoPorMesa(int mesaId)
+        {
+            try
+            {
+                if (mesaId <= 0)
+                    throw new Exception("ID de mesa no válido");
+
+                return datPedido.Instancia.ObtenerPedidoPorMesa(mesaId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener pedido: " + ex.Message);
+            }
+        }
+
+        // Actualizar pedido (agregar/eliminar detalles)
+        public bool ActualizarPedido(int pedidoId, List<int> detallesEliminar, List<entDetallePedido> detallesNuevos)
+        {
+            try
+            {
+                if (pedidoId <= 0)
+                    throw new Exception("ID de pedido no válido");
+
+                // Eliminar detalles
+                if (detallesEliminar != null && detallesEliminar.Count > 0)
+                {
+                    foreach (var detalleId in detallesEliminar)
+                    {
+                        datPedido.Instancia.EliminarDetalle(detalleId);
+                    }
+                }
+
+                // Agregar nuevos detalles
+                if (detallesNuevos != null && detallesNuevos.Count > 0)
+                {
+                    foreach (var detalle in detallesNuevos)
+                    {
+                        datPedido.Instancia.AgregarDetalle(pedidoId, detalle);
+                    }
+                }
+
+                // Recalcular total
+                var detalles = datPedido.Instancia.ObtenerDetallePedido(pedidoId);
+                decimal nuevoTotal = detalles.Sum(d => d.SubTotal);
+                datPedido.Instancia.ActualizarTotalPedido(pedidoId, nuevoTotal);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al actualizar pedido: " + ex.Message);
+            }
+        }
+
+        // Actualizar cantidad de un detalle
+        public bool ActualizarCantidadDetalle(int detalleId, int nuevaCantidad)
+        {
+            try
+            {
+                if (detalleId <= 0)
+                    throw new Exception("ID de detalle no válido");
+
+                if (nuevaCantidad <= 0)
+                    throw new Exception("La cantidad debe ser mayor a 0");
+
+                bool resultado = datPedido.Instancia.ActualizarCantidadDetalle(detalleId, nuevaCantidad);
+
+                // Recalcular total del pedido
+                var detalle = datPedido.Instancia.ObtenerDetallePedido(0)
+                    .FirstOrDefault(d => d.DetalleId == detalleId);
+
+                if (detalle != null)
+                {
+                    var detalles = datPedido.Instancia.ObtenerDetallePedido(detalle.PedidoId);
+                    decimal nuevoTotal = detalles.Sum(d => d.SubTotal);
+                    datPedido.Instancia.ActualizarTotalPedido(detalle.PedidoId, nuevoTotal);
+                }
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al actualizar cantidad: " + ex.Message);
+            }
+        }
         #endregion
     }
 }

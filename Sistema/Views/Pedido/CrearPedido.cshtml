@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Nuevo Pedido";
+    ViewData["Title"] = ViewBag.ModoEdicion == true ? "Editar Pedido" : "Nuevo Pedido";
     Layout = "~/Views/Shared/_LayoutMozo.cshtml";
 }
 
@@ -12,6 +12,10 @@
         <div class="info-pedido">
             <h2>Mesa @ViewBag.NroMesa</h2>
             <p>@ViewBag.NombreMesero</p>
+            @if (ViewBag.ModoEdicion == true)
+            {
+                <span class="badge-edicion">Editando</span>
+            }
         </div>
         <button class="btn-finalizar" onclick="confirmarPedido()">
             <i class="bi bi-check-lg"></i>
@@ -28,7 +32,6 @@
             <button class="btn-categoria active" data-categoria="0" onclick="filtrarCategoria(0)">
                 Todos
             </button>
-            <!-- Las categorías se cargarán dinámicamente -->
         </div>
     </div>
 
@@ -40,12 +43,34 @@
     </div>
 
     <!-- Carrito Flotante -->
-    <div class="carrito-flotante" id="carritoFlotante">
+    @* <div class="carrito-flotante" id="carritoFlotante">
         <div class="carrito-header">
             <h3>Carrito</h3>
             <button class="btn-limpiar" onclick="limpiarCarrito()">
                 <i class="bi bi-trash"></i>
             </button>
+        </div>
+        <div class="carrito-items" id="carritoItems">
+            <p class="carrito-vacio">No hay productos agregados</p>
+        </div>
+        <div class="carrito-total">
+            <span>TOTAL:</span>
+            <span id="totalCarrito">S/ 0.00</span>
+        </div>
+    </div> *@
+
+    <!-- Carrito Flotante -->
+    <div class="carrito-flotante" id="carritoFlotante">
+        <div class="carrito-header" onclick="toggleCarrito()">
+            <h3>Carrito</h3>
+            <div class="carrito-controles">
+                <button class="btn-toggle-carrito" id="btnToggleCarrito">
+                    <i class="bi bi-chevron-up"></i>
+                </button>
+                <button class="btn-limpiar" onclick="event.stopPropagation(); limpiarCarrito();">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
         </div>
         <div class="carrito-items" id="carritoItems">
             <p class="carrito-vacio">No hay productos agregados</p>
@@ -73,7 +98,6 @@
                 <p id="modalDescripcion"></p>
             </div>
             <div class="variantes-lista" id="variantesLista">
-                <!-- Las variantes se cargarán aquí -->
             </div>
         </div>
     </div>
@@ -88,11 +112,69 @@
     let carrito = [];
     let productoSeleccionado = null;
     const mesaId = @ViewBag.MesaId;
+    const modoEdicion = @(ViewBag.ModoEdicion?.ToString().ToLower() ?? "false");
+    const pedidoId = @(ViewBag.PedidoId ?? 0);
+
+    // Items para eliminar y agregar (modo edición)
+    let detallesParaEliminar = [];
+    let detallesExistentes = [];
 
     // Cargar datos al iniciar
     document.addEventListener('DOMContentLoaded', function() {
         cargarProductos();
+
+        // Si está en modo edición, cargar pedido existente
+        if (modoEdicion && pedidoId > 0) {
+            cargarPedidoExistente();
+        }
     });
+
+        // Toggle del carrito (expandir/colapsar)
+    function toggleCarrito() {
+        const carrito = document.getElementById('carritoFlotante');
+        const btnToggle = document.getElementById('btnToggleCarrito');
+        const icon = btnToggle.querySelector('i');
+
+        carrito.classList.toggle('expandido');
+
+        // Cambiar el ícono
+        if (carrito.classList.contains('expandido')) {
+            icon.className = 'bi bi-chevron-down';
+        } else {
+            icon.className = 'bi bi-chevron-up';
+        }
+    }
+
+    // Cargar pedido existente
+    function cargarPedidoExistente() {
+        fetch(`@Url.Action("ObtenerDetallePedido", "Pedido")?pedidoId=${pedidoId}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    result.data.forEach(detalle => {
+                        const item = {
+                            detalleId: detalle.detalleId,
+                            varianteId: detalle.varianteId,
+                            nombreProducto: detalle.nombreProducto,
+                            tamaño: detalle.tamaño,
+                            precio: detalle.precioUnitario,
+                            cantidad: detalle.cantidad,
+                            estadoDetalle: detalle.estadoDetalle,
+                            esExistente: true
+                        };
+
+                        carrito.push(item);
+                        if (detalle.estadoDetalle === 'Pendiente') {
+                            detallesExistentes.push(detalle.detalleId);
+                        }
+                    });
+                    actualizarCarrito();
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar pedido:', error);
+            });
+    }
 
     // Cargar productos
     function cargarProductos() {
@@ -143,7 +225,6 @@
 
         let html = '';
         listaProductos.forEach(prod => {
-            // Construir URL de imagen igual que en la tabla de productos
             const imagenUrl = prod.imagen ? '@Url.Action("Producto", "Imagen")?nombre=' + prod.imagen : '';
 
             html += `
@@ -168,13 +249,11 @@
 
     // Filtrar por categoría
     function filtrarCategoria(categoriaId) {
-        // Actualizar botones activos
         document.querySelectorAll('.btn-categoria').forEach(btn => {
             btn.classList.remove('active');
         });
         event.target.classList.add('active');
 
-        // Filtrar productos
         if (categoriaId === 0) {
             mostrarProductos(productos);
         } else {
@@ -199,7 +278,6 @@
         document.getElementById('modalNombre').textContent = producto.nombre;
         document.getElementById('modalDescripcion').textContent = producto.descripcion || '';
 
-        // Construir URL de imagen igual que en la tabla
         const imgModal = document.getElementById('modalImagen');
         if (producto.imagen) {
             imgModal.src = '@Url.Action("Producto", "Imagen")?nombre=' + producto.imagen;
@@ -237,20 +315,20 @@
 
     // Agregar al carrito
     function agregarAlCarrito(varianteId, tamaño, precio) {
-        const item = {
-            varianteId: varianteId,
-            nombreProducto: productoSeleccionado.nombre,
-            tamaño: tamaño,
-            precio: precio,
-            cantidad: 1
-        };
-
-        // Verificar si ya existe en el carrito
-        const index = carrito.findIndex(i => i.varianteId === varianteId);
+        const index = carrito.findIndex(i => i.varianteId === varianteId && !i.esExistente);
 
         if (index >= 0) {
             carrito[index].cantidad++;
         } else {
+            const item = {
+                varianteId: varianteId,
+                nombreProducto: productoSeleccionado.nombre,
+                tamaño: tamaño,
+                precio: precio,
+                cantidad: 1,
+                esExistente: false,
+                estadoDetalle: 'Pendiente'
+            };
             carrito.push(item);
         }
 
@@ -275,22 +353,29 @@
             const subtotal = item.precio * item.cantidad;
             total += subtotal;
 
+            const puedeEditar = item.estadoDetalle === 'Pendiente' || !item.esExistente;
+            const estadoBadge = item.esExistente ? `<span class="badge-estado badge-${item.estadoDetalle.toLowerCase().replace(' ', '-')}">${item.estadoDetalle}</span>` : '';
+
             html += `
-                <div class="carrito-item">
+                <div class="carrito-item ${!puedeEditar ? 'item-bloqueado' : ''}">
                     <div class="item-info">
-                        <h5>${item.nombreProducto}</h5>
+                        <h5>${item.nombreProducto} ${estadoBadge}</h5>
                         <p>${item.tamaño} - S/ ${item.precio.toFixed(2)}</p>
                     </div>
                     <div class="item-controles">
-                        <button onclick="cambiarCantidad(${index}, -1)">-</button>
-                        <span>${item.cantidad}</span>
-                        <button onclick="cambiarCantidad(${index}, 1)">+</button>
+                        ${puedeEditar ? `
+                            <button onclick="cambiarCantidad(${index}, -1)">-</button>
+                            <span>${item.cantidad}</span>
+                            <button onclick="cambiarCantidad(${index}, 1)">+</button>
+                        ` : `<span class="cantidad-fija">${item.cantidad}</span>`}
                     </div>
                     <div class="item-subtotal">
                         <span>S/ ${subtotal.toFixed(2)}</span>
-                        <button class="btn-eliminar-item" onclick="eliminarItem(${index})">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        ${puedeEditar ? `
+                            <button class="btn-eliminar-item" onclick="eliminarItem(${index})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -305,38 +390,85 @@
         carrito[index].cantidad += cambio;
 
         if (carrito[index].cantidad <= 0) {
-            carrito.splice(index, 1);
+            eliminarItem(index);
+        } else {
+            actualizarCarrito();
         }
-
-        actualizarCarrito();
     }
 
     // Eliminar item
     function eliminarItem(index) {
+        const item = carrito[index];
+
+        // Si es un item existente y está pendiente, marcarlo para eliminar
+        if (item.esExistente && item.detalleId) {
+            if (!detallesParaEliminar.includes(item.detalleId)) {
+                detallesParaEliminar.push(item.detalleId);
+            }
+        }
+
         carrito.splice(index, 1);
         actualizarCarrito();
     }
 
     // Limpiar carrito
     function limpiarCarrito() {
-        if (confirm('¿Está seguro de limpiar el carrito?')) {
-            carrito = [];
+        const itemsEditables = carrito.filter(i => i.estadoDetalle === 'Pendiente' || !i.esExistente);
+
+        if (itemsEditables.length === 0) {
+            alert('No hay productos que se puedan eliminar');
+            return;
+        }
+
+        if (confirm('¿Está seguro de limpiar los productos editables del carrito?')) {
+            // Marcar items existentes pendientes para eliminar
+            carrito.forEach(item => {
+                if (item.esExistente && item.detalleId && item.estadoDetalle === 'Pendiente') {
+                    if (!detallesParaEliminar.includes(item.detalleId)) {
+                        detallesParaEliminar.push(item.detalleId);
+                    }
+                }
+            });
+
+            // Mantener solo los items no editables
+            carrito = carrito.filter(i => i.estadoDetalle !== 'Pendiente' && i.esExistente);
             actualizarCarrito();
         }
     }
 
     // Confirmar pedido
     function confirmarPedido() {
-        if (carrito.length === 0) {
-            alert('Debe agregar al menos un producto al pedido');
-            return;
-        }
+        const itemsNuevos = carrito.filter(i => !i.esExistente);
 
-        if (!confirm('¿Confirmar pedido?')) {
-            return;
-        }
+        if (modoEdicion) {
+            // Modo edición
+            if (itemsNuevos.length === 0 && detallesParaEliminar.length === 0) {
+                alert('No hay cambios para guardar');
+                return;
+            }
 
-        // Preparar datos del pedido
+            if (!confirm('¿Guardar cambios en el pedido?')) {
+                return;
+            }
+
+            actualizarPedidoExistente();
+        } else {
+            // Modo creación
+            if (carrito.length === 0) {
+                alert('Debe agregar al menos un producto al pedido');
+                return;
+            }
+
+            if (!confirm('¿Confirmar pedido?')) {
+                return;
+            }
+
+            crearNuevoPedido();
+        }
+    }
+
+    // Crear nuevo pedido
+    function crearNuevoPedido() {
         const detalles = carrito.map(item => ({
             varianteId: item.varianteId,
             cantidad: item.cantidad,
@@ -352,12 +484,9 @@
             detalles: detalles
         };
 
-        // Enviar pedido
         fetch('@Url.Action("GuardarPedido", "Pedido")', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(pedido)
         })
         .then(response => response.json())
@@ -375,9 +504,48 @@
         });
     }
 
+    // Actualizar pedido existente
+    function actualizarPedidoExistente() {
+        const detallesNuevos = carrito
+            .filter(i => !i.esExistente)
+            .map(item => ({
+                varianteId: item.varianteId,
+                cantidad: item.cantidad,
+                precioUnitario: item.precio,
+                subTotal: item.precio * item.cantidad
+            }));
+
+        const request = {
+            pedidoId: pedidoId,
+            detallesEliminar: detallesParaEliminar,
+            detallesNuevos: detallesNuevos
+        };
+
+        fetch('@Url.Action("ActualizarPedido", "Pedido")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(request)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('Pedido actualizado correctamente');
+                window.location.href = '@Url.Action("Index", "Mozo")';
+            } else {
+                alert('Error: ' + result.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al actualizar el pedido');
+        });
+    }
+
     // Volver a mesas
     function volverMesas() {
-        if (carrito.length > 0) {
+        const itemsNuevos = carrito.filter(i => !i.esExistente);
+
+        if (itemsNuevos.length > 0 || detallesParaEliminar.length > 0) {
             if (!confirm('¿Está seguro de salir? Se perderán los cambios no guardados')) {
                 return;
             }

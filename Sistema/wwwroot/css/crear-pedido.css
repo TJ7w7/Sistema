@@ -184,7 +184,7 @@
 }
 
 /* ===== CARRITO FLOTANTE ===== */
-.carrito-flotante {
+/*.carrito-flotante {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -325,6 +325,261 @@
     align-items: center;
     font-weight: bold;
     font-size: 1.1rem;
+}*/
+
+/* Carrito Flotante */
+.carrito-flotante {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 20px 20px 0 0;
+    max-width: 600px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    z-index: 100;
+    max-height: 180px; /* Altura colapsada */
+}
+
+    .carrito-flotante.expandido {
+        max-height: 70vh; /* Altura expandida */
+    }
+
+.carrito-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #e56717;
+    color: white;
+    border-radius: 20px 20px 0 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+    .carrito-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+.carrito-controles {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-toggle-carrito {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .btn-toggle-carrito:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-toggle-carrito i {
+        font-size: 1.2rem;
+    }
+
+.btn-limpiar {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .btn-limpiar:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+.carrito-items {
+    overflow-y: auto;
+    max-height: calc(70vh - 140px); /* Resta header y total */
+    padding: 15px;
+}
+
+.carrito-flotante:not(.expandido) .carrito-items {
+    max-height: 80px; /* Altura de items cuando está colapsado */
+}
+
+.carrito-vacio {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+    margin: 0;
+}
+
+.carrito-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    background: white;
+}
+
+    .carrito-item:last-child {
+        border-bottom: none;
+    }
+
+.item-bloqueado {
+    background-color: #f8f9fa;
+    opacity: 0.7;
+}
+
+.item-info h5 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.item-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.badge-estado {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    margin-left: 8px;
+    font-weight: 600;
+}
+
+.badge-pendiente {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-en-preparación {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.badge-listo {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-entregado {
+    background-color: #e2e3e5;
+    color: #41464b;
+}
+
+.item-controles {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+    .item-controles button {
+        background: #e56717;
+        border: none;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
+        .item-controles button:hover {
+            background: #c6540d;
+        }
+
+    .item-controles span {
+        min-width: 25px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+.cantidad-fija {
+    font-weight: bold;
+    color: #666;
+    padding: 0 10px;
+}
+
+.item-subtotal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+    .item-subtotal span {
+        font-weight: bold;
+        color: #e56717;
+    }
+
+.btn-eliminar-item {
+    background: #dc3545;
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+    .btn-eliminar-item:hover {
+        background: #c82333;
+    }
+
+.carrito-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-top: 2px solid #e56717;
+}
+
+    .carrito-total span:last-child {
+        color: #e56717;
+        font-size: 1.3rem;
+    }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .carrito-flotante {
+        max-height: 150px;
+    }
+
+        .carrito-flotante.expandido {
+            max-height: 80vh;
+        }
+
+    .carrito-items {
+        max-height: calc(80vh - 140px);
+    }
 }
 
 /* ===== MODAL VARIANTES ===== */
@@ -514,4 +769,57 @@
         max-width: 1200px;
         border-radius: 15px 15px 0 0;
     }
+}
+
+/* ===== BADGE EDICIÓN ===== */
+.badge-edicion {
+    background: #ffc107;
+    color: #333;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+/* ===== ESTADOS DE DETALLE ===== */
+.badge-estado {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.badge-pendiente {
+    background: #ffc107;
+    color: #333;
+}
+
+.badge-en-preparación {
+    background: #17a2b8;
+    color: white;
+}
+
+.badge-listo {
+    background: #28a745;
+    color: white;
+}
+
+.badge-entregado {
+    background: #6c757d;
+    color: white;
+}
+
+/* ===== ITEMS BLOQUEADOS ===== */
+.item-bloqueado {
+    background-color: #f8f9fa;
+    opacity: 0.8;
+}
+
+.cantidad-fija {
+    font-weight: bold;
+    color: #666;
+    padding: 0 10px;
 }

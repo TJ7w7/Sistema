@@ -1,4 +1,44 @@
-﻿/* ===== CONTENEDOR GENERAL ===== */
+﻿/* ===== MODAL OPCIONES MESA ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+    .modal-overlay.show {
+        display: flex !important;
+    }
+
+.modal-opciones {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
+/* ===== CONTENEDOR GENERAL ===== */
 .contenedor-pedidos {
     max-width: 600px;
     margin: 20px auto;
@@ -209,3 +249,81 @@
 .pedido {
     cursor: pointer;
 }
+
+/* ===== MODAL OPCIONES MESA ===== */
+.modal-overlay.show {
+    display: flex !important;
+}
+
+.modal-opciones {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.modal-header-opciones {
+    background: #e56717;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .modal-header-opciones h3 {
+        margin: 0;
+        font-size: 1.3rem;
+    }
+
+.btn-cerrar-modal-opciones {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.modal-body-opciones {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-opcion-mesa {
+    background: white;
+    border: 2px solid #e56717;
+    color: #e56717;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+}
+
+    .btn-opcion-mesa:hover {
+        background: #e56717;
+        color: white;
+    }
+
+    .btn-opcion-mesa i {
+        font-size: 1.5rem;
+    }
+
+.btn-ver-estado {
+    border-color: #17a2b8 !important;
+    color: #17a2b8 !important;
+}
+
+    .btn-ver-estado:hover {
+        background-color: #17a2b8 !important;
+        color: white !important;
+    }

@@ -2,6 +2,7 @@
     ViewData["Title"] = "Mozo";
     Layout = "~/Views/Shared/_LayoutMozo.cshtml";
 }
+
 <div class="contenedor-pedidos">
     <!-- Encabezado -->
     <div class="encabezado">
@@ -40,6 +41,50 @@
         <!-- Las mesas se cargarán aquí -->
         <div class="loading-container">
             <p>Cargando mesas...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Opciones Mesa (agregar antes de </div> contenedor-pedidos) -->
+@* <div class="modal-overlay" id="modalOpcionesMesa">
+    <div class="modal-opciones">
+        <div class="modal-header-opciones">
+            <h3>Mesa <span id="modalMesaNumero"></span></h3>
+            <button class="btn-cerrar-modal-opciones" onclick="cerrarModalOpciones()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body-opciones">
+            <button class="btn-opcion-mesa" onclick="verEditarPedido()">
+                <i class="bi bi-pencil-square"></i>
+                <span>Ver/Editar Pedido</span>
+            </button>
+            <button class="btn-opcion-mesa" onclick="agregarMasProductos()">
+                <i class="bi bi-plus-circle"></i>
+                <span>Agregar más productos</span>
+            </button>
+        </div>
+    </div>
+</div> *@
+
+<!-- Modal Opciones Mesa -->
+<div class="modal-overlay" id="modalOpcionesMesa" style="display: none;">
+    <div class="modal-opciones">
+        <div class="modal-header-opciones">
+            <h3>Mesa <span id="modalMesaNumero"></span></h3>
+            <button class="btn-cerrar-modal-opciones" onclick="cerrarModalOpciones()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body-opciones">
+            <button class="btn-opcion-mesa" onclick="agregarEditarPedido()">
+                <i class="bi bi-plus-circle"></i>
+                <span>Agregar/Editar Pedido</span>
+            </button>
+            <button class="btn-opcion-mesa btn-ver-estado" onclick="verEstadoPedido()">
+                <i class="bi bi-eye"></i>
+                <span>Ver Estado y Entregar</span>
+            </button>
         </div>
     </div>
 </div>
@@ -117,12 +162,6 @@
         return estado.charAt(0).toUpperCase() + estado.slice(1).toLowerCase();
     }
 
-    function seleccionarMesa(mesaId, nroMesa) {
-        console.log('Mesa seleccionada:', mesaId, nroMesa);
-        // Redirigir a crear pedido
-        window.location.href = `@Url.Action("CrearPedido", "Pedido")?mesaId=${mesaId}&nroMesa=${nroMesa}`;
-    }
-
     function refrescarMesas() {
         cargarMesas();
     }
@@ -136,6 +175,70 @@
             </div>
         `;
     }
+
+        // Modificar la función seleccionarMesa
+    function seleccionarMesa(mesaId, nroMesa) {
+        console.log('Mesa seleccionada:', mesaId, nroMesa);
+
+        // Verificar si la mesa está ocupada (tiene pedido activo)
+        fetch(`@Url.Action("ObtenerPedidoPorMesa", "Pedido")?mesaId=${mesaId}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // Mesa ocupada - mostrar opciones
+                    mostrarOpcionesMesa(mesaId, nroMesa, result.pedido.pedidoId);
+                } else {
+                    // Mesa libre - crear nuevo pedido
+                    window.location.href = `@Url.Action("CrearPedido", "Pedido")?mesaId=${mesaId}&nroMesa=${nroMesa}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // En caso de error, asumir que está libre
+                window.location.href = `@Url.Action("CrearPedido", "Pedido")?mesaId=${mesaId}&nroMesa=${nroMesa}`;
+            });
+    }
+
+
+    // Variable global para almacenar datos del modal
+    let mesaSeleccionada = { mesaId: 0, nroMesa: 0, pedidoId: 0 };
+
+    //Mostrar modal de opciones
+    function mostrarOpcionesMesa(mesaId, nroMesa, pedidoId) {
+        mesaSeleccionada = { mesaId, nroMesa, pedidoId };
+        document.getElementById('modalMesaNumero').textContent = nroMesa;
+        document.getElementById('modalOpcionesMesa').classList.add('show');
+    }
+
+
+    // Cerrar modal de opciones
+    function cerrarModalOpciones() {
+        document.getElementById('modalOpcionesMesa').classList.remove('show');
+    }
+
+        // Agregar/Editar pedido
+    function agregarEditarPedido() {
+        window.location.href = `@Url.Action("EditarPedido", "Pedido")?mesaId=${mesaSeleccionada.mesaId}&nroMesa=${mesaSeleccionada.nroMesa}&pedidoId=${mesaSeleccionada.pedidoId}`;
+    }
+
+    // Ver estado del pedido
+    function verEstadoPedido() {
+        window.location.href = `@Url.Action("VerEstado", "Pedido")?mesaId=${mesaSeleccionada.mesaId}&nroMesa=${mesaSeleccionada.nroMesa}&pedidoId=${mesaSeleccionada.pedidoId}`;
+    }
+
+    // Eliminar estas funciones ya no necesarias
+    // function verEditarPedido() { ... }
+    // function agregarMasProductos() { ... }
+
+    // // Ver/Editar pedido
+    // function verEditarPedido() {
+    //     window.location.href = `@Url.Action("EditarPedido", "Pedido")?mesaId=${mesaSeleccionada.mesaId}&nroMesa=${mesaSeleccionada.nroMesa}&pedidoId=${mesaSeleccionada.pedidoId}`;
+    // }
+
+    // // Agregar más productos (mismo que editar)
+    // function agregarMasProductos() {
+    //     verEditarPedido();
+    // }
 
     // Funciones de botones
     function volverAtras() {

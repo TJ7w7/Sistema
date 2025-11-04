@@ -175,5 +175,100 @@ namespace Sistema.Controllers
             }
         }
 
+        // Vista para editar pedido (reutiliza CrearPedido)
+        public IActionResult EditarPedido(int mesaId, int nroMesa, int pedidoId)
+        {
+            if (mesaId <= 0 || nroMesa <= 0 || pedidoId <= 0)
+            {
+                return RedirectToAction("Index", "Mozo");
+            }
+
+            ViewBag.MesaId = mesaId;
+            ViewBag.NroMesa = nroMesa;
+            ViewBag.PedidoId = pedidoId;
+            ViewBag.ModoEdicion = true;
+
+            var nombreCompleto = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? "Mesero";
+            ViewBag.NombreMesero = nombreCompleto;
+
+            return View("CrearPedido");
+        }
+
+        // Obtener pedido activo por mesa
+        [HttpGet]
+        public JsonResult ObtenerPedidoPorMesa(int mesaId)
+        {
+            try
+            {
+                var pedido = logPedido.Instancia.ObtenerPedidoPorMesa(mesaId);
+
+                if (pedido == null)
+                    return Json(new { success = false, mensaje = "No hay pedido activo en esta mesa" });
+
+                // Obtener detalles
+                var detalles = logPedido.Instancia.ObtenerDetallePedido(pedido.PedidoId);
+
+                return Json(new
+                {
+                    success = true,
+                    pedido = pedido,
+                    detalles = detalles
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = "Error: " + ex.Message });
+            }
+        }
+
+        // Actualizar pedido
+        [HttpPost]
+        public JsonResult ActualizarPedido([FromBody] ActualizarPedidoRequest request)
+        {
+            try
+            {
+                bool resultado = logPedido.Instancia.ActualizarPedido(
+                    request.PedidoId,
+                    request.DetallesEliminar,
+                    request.DetallesNuevos
+                );
+
+                return Json(new
+                {
+                    success = resultado,
+                    mensaje = "Pedido actualizado correctamente"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = "Error: " + ex.Message });
+            }
+        }
+
+        // Clase auxiliar
+        public class ActualizarPedidoRequest
+        {
+            public int PedidoId { get; set; }
+            public List<int> DetallesEliminar { get; set; }
+            public List<entDetallePedido> DetallesNuevos { get; set; }
+        }
+
+        // Vista para ver estado del pedido
+        public IActionResult VerEstado(int mesaId, int nroMesa, int pedidoId)
+        {
+            if (mesaId <= 0 || nroMesa <= 0 || pedidoId <= 0)
+            {
+                return RedirectToAction("Index", "Mozo");
+            }
+
+            ViewBag.MesaId = mesaId;
+            ViewBag.NroMesa = nroMesa;
+            ViewBag.PedidoId = pedidoId;
+
+            var nombreCompleto = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? "Mesero";
+            ViewBag.NombreMesero = nombreCompleto;
+
+            return View();
+        }
     }
 }

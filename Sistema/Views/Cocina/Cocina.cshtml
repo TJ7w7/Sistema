@@ -1,0 +1,373 @@
+﻿@{
+    ViewData["Title"] = "Cocina - " + ViewBag.EstacionNombre;
+    Layout = "~/Views/Shared/_LayoutMozo.cshtml";
+}
+
+<div class="contenedor-cocina">
+    <!-- Encabezado -->
+    <div class="encabezado-cocina">
+        <div class="info-estacion">
+            <h1><i class="bi bi-fire"></i> @ViewBag.EstacionNombre</h1>
+            <p>@ViewBag.NombreUsuario</p>
+        </div>
+        <button class="btn-refrescar" onclick="refrescarPedidos()">
+            <i class="bi bi-arrow-clockwise"></i>
+            Actualizar
+        </button>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="estadisticas-cocina">
+        <div class="stat-card stat-pendiente">
+            <i class="bi bi-hourglass-split"></i>
+            <div class="stat-info">
+                <span class="stat-numero" id="statPendientes">0</span>
+                <span class="stat-label">Pendientes</span>
+            </div>
+        </div>
+        <div class="stat-card stat-preparacion">
+            <i class="bi bi-gear-fill"></i>
+            <div class="stat-info">
+                <span class="stat-numero" id="statEnPreparacion">0</span>
+                <span class="stat-label">En Preparación</span>
+            </div>
+        </div>
+        <div class="stat-card stat-listo">
+            <i class="bi bi-check-circle-fill"></i>
+            <div class="stat-info">
+                <span class="stat-numero" id="statListos">0</span>
+                <span class="stat-label">Listos</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-cocina">
+        <button class="btn-filtro-cocina active" data-estado="todos" onclick="filtrarPorEstado('todos')">
+            <i class="bi bi-list-ul"></i> Todos
+        </button>
+        <button class="btn-filtro-cocina" data-estado="Pendiente" onclick="filtrarPorEstado('Pendiente')">
+            <i class="bi bi-hourglass-split"></i> Pendientes
+        </button>
+        <button class="btn-filtro-cocina" data-estado="En Preparación" onclick="filtrarPorEstado('En Preparación')">
+            <i class="bi bi-gear-fill"></i> En Preparación
+        </button>
+        <button class="btn-filtro-cocina" data-estado="Listo" onclick="filtrarPorEstado('Listo')">
+            <i class="bi bi-check-circle"></i> Listos
+        </button>
+    </div>
+
+    <!-- Grid de Pedidos -->
+    <div class="grid-pedidos-cocina" id="gridPedidos">
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <p>Cargando pedidos...</p>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="~/css/cocina.css" />
+
+<script>
+    const estacionId = @ViewBag.EstacionId;
+    let pedidos = [];
+    let estadoFiltro = 'todos';
+    let autoRefresh;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarPedidos();
+        actualizarEstadisticas();
+
+        // Auto-refresh cada 30 segundos
+        autoRefresh = setInterval(() => {
+            cargarPedidos(true); // true = silencioso, sin mostrar loading
+            actualizarEstadisticas();
+        }, 30000);
+    });
+
+    function cargarPedidos(silencioso = false) {
+        if (!silencioso) {
+            document.getElementById('gridPedidos').innerHTML = `
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p>Cargando pedidos...</p>
+                </div>
+            `;
+        }
+
+        const estado = estadoFiltro === 'todos' ? null : estadoFiltro;
+        const url = `@Url.Action("ObtenerDetallesEstacion", "Cocina")?estacionId=${estacionId}${estado ? '&estadoDetalle=' + encodeURIComponent(estado) : ''}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    pedidos = result.data;
+                    mostrarPedidos();
+                } else {
+                    mostrarError(result.mensaje);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (!silencioso) {
+                    mostrarError('Error al cargar pedidos');
+                }
+            });
+    }
+
+    function mostrarPedidos() {
+        const contenedor = document.getElementById('gridPedidos');
+
+        if (pedidos.length === 0) {
+            contenedor.innerHTML = `
+                <div class="sin-pedidos">
+                    <i class="bi bi-inbox"></i>
+                    <p>No hay pedidos ${estadoFiltro !== 'todos' ? 'en estado: ' + estadoFiltro : ''}</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Agrupar por pedido
+        const pedidosAgrupados = agruparPorPedido(pedidos);
+
+        let html = '';
+        pedidosAgrupados.forEach(grupo => {
+            html += crearCardPedido(grupo);
+        });
+
+        contenedor.innerHTML = html;
+    }
+
+    function agruparPorPedido(detalles) {
+        const grupos = {};
+
+        detalles.forEach(detalle => {
+            if (!grupos[detalle.pedidoId]) {
+                grupos[detalle.pedidoId] = {
+                    pedidoId: detalle.pedidoId,
+                    nroMesa: detalle.nroMesa || 'S/N',
+                    nombreMozo: detalle.nombreMozo || 'N/A',
+                    fecha: detalle.fecha,
+                    productos: []
+                };
+            }
+            grupos[detalle.pedidoId].productos.push(detalle);
+        });
+
+        return Object.values(grupos);
+    }
+
+    function crearCardPedido(grupo) {
+        const tiempoTranscurrido = calcularTiempoTranscurrido(grupo.fecha);
+        const prioridadClass = obtenerPrioridadClass(tiempoTranscurrido);
+
+        let productosHtml = '';
+        grupo.productos.forEach(prod => {
+            const estadoClass = prod.estadoDetalle.toLowerCase().replace(' ', '-');
+            const botones = generarBotones(prod);
+
+            productosHtml += `
+                <div class="producto-cocina ${estadoClass}">
+                    <div class="producto-info-cocina">
+                        <h4>${prod.nombreProducto} <span class="cantidad-badge">×${prod.cantidad}</span></h4>
+                        <p class="tamaño-producto">${prod.tamaño}</p>
+                        <span class="badge-estado-cocina badge-${estadoClass}">${prod.estadoDetalle}</span>
+                    </div>
+                    <div class="producto-acciones">
+                        ${botones}
+                    </div>
+                </div>
+            `;
+        });
+
+        return `
+            <div class="card-pedido-cocina ${prioridadClass}">
+                <div class="header-pedido-cocina">
+                    <div class="info-mesa">
+                        <h3><i class="bi bi-table"></i> Mesa ${grupo.nroMesa}</h3>
+                        <p class="mozo-info"><i class="bi bi-person"></i> ${grupo.nombreMozo}</p>
+                    </div>
+                    <div class="tiempo-pedido">
+                        <i class="bi bi-clock"></i>
+                        <span class="tiempo-texto">${tiempoTranscurrido}</span>
+                    </div>
+                </div>
+                <div class="body-pedido-cocina">
+                    ${productosHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    function generarBotones(producto) {
+        switch(producto.estadoDetalle) {
+            case 'Pendiente':
+                return `
+                    <button class="btn-accion-cocina btn-iniciar" onclick="iniciarPreparacion(${producto.detalleId})">
+                        <i class="bi bi-play-fill"></i> Iniciar
+                    </button>
+                `;
+            case 'En Preparación':
+                return `
+                    <button class="btn-accion-cocina btn-finalizar" onclick="marcarComoListo(${producto.detalleId})">
+                        <i class="bi bi-check-lg"></i> Listo
+                    </button>
+                `;
+            case 'Listo':
+                return `
+                    <span class="texto-listo">
+                        <i class="bi bi-check-circle-fill"></i> Esperando entrega
+                    </span>
+                `;
+            default:
+                return '';
+        }
+    }
+
+    function calcularTiempoTranscurrido(fecha) {
+        if (!fecha) return 'Hace un momento';
+
+        const ahora = new Date();
+        const fechaPedido = new Date(fecha);
+        const diff = Math.floor((ahora - fechaPedido) / 1000 / 60); // minutos
+
+        if (diff < 1) return 'Hace un momento';
+        if (diff < 60) return `Hace ${diff} min`;
+
+        const horas = Math.floor(diff / 60);
+        const mins = diff % 60;
+        return `Hace ${horas}h ${mins}min`;
+    }
+
+    function obtenerPrioridadClass(tiempo) {
+        const match = tiempo.match(/(\d+)/);
+        if (!match) return '';
+
+        const minutos = parseInt(match[1]);
+
+        if (tiempo.includes('h')) {
+            return 'prioridad-alta'; // Más de 1 hora
+        }
+        if (minutos > 30) {
+            return 'prioridad-media'; // 30-60 minutos
+        }
+        return 'prioridad-normal'; // Menos de 30 minutos
+    }
+
+    function iniciarPreparacion(detalleId) {
+        fetch('@Url.Action("IniciarPreparacion", "Cocina")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `detalleId=${detalleId}`
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                cargarPedidos();
+                actualizarEstadisticas();
+            } else {
+                alert('Error: ' + result.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al iniciar preparación');
+        });
+    }
+
+    function marcarComoListo(detalleId) {
+        if (!confirm('¿Marcar este producto como listo?')) {
+            return;
+        }
+
+        fetch('@Url.Action("MarcarComoListo", "Cocina")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `detalleId=${detalleId}`
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                cargarPedidos();
+                actualizarEstadisticas();
+
+                // Notificación visual
+                mostrarNotificacion('Producto marcado como listo');
+            } else {
+                alert('Error: ' + result.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al marcar como listo');
+        });
+    }
+
+    function actualizarEstadisticas() {
+        fetch(`@Url.Action("ObtenerEstadisticas", "Cocina")?estacionId=${estacionId}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    document.getElementById('statPendientes').textContent = result.data.pendientes;
+                    document.getElementById('statEnPreparacion').textContent = result.data.enPreparacion;
+                    document.getElementById('statListos').textContent = result.data.listos;
+                }
+            })
+            .catch(error => {
+                console.error('Error al actualizar estadísticas:', error);
+            });
+    }
+
+    function filtrarPorEstado(estado) {
+        estadoFiltro = estado;
+
+        document.querySelectorAll('.btn-filtro-cocina').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.closest('.btn-filtro-cocina').classList.add('active');
+
+        cargarPedidos();
+    }
+
+    function refrescarPedidos() {
+        cargarPedidos();
+        actualizarEstadisticas();
+        mostrarNotificacion('Actualizado');
+    }
+
+    function mostrarNotificacion(mensaje) {
+        const notif = document.createElement('div');
+        notif.className = 'notificacion-cocina';
+        notif.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${mensaje}`;
+        document.body.appendChild(notif);
+
+        setTimeout(() => {
+            notif.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            notif.classList.remove('show');
+            setTimeout(() => notif.remove(), 300);
+        }, 2000);
+    }
+
+    function mostrarError(mensaje) {
+        const contenedor = document.getElementById('gridPedidos');
+        contenedor.innerHTML = `
+            <div class="error-container">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p class="error-mensaje">${mensaje}</p>
+                <button class="btn-reintentar" onclick="cargarPedidos()">
+                    <i class="bi bi-arrow-clockwise"></i> Reintentar
+                </button>
+            </div>
+        `;
+    }
+
+    // Limpiar intervalo al salir
+    window.addEventListener('beforeunload', () => {
+        clearInterval(autoRefresh);
+    });
+</script>

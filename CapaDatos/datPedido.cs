@@ -312,5 +312,168 @@ namespace CapaDatos
 
             return lista;
         }
+        // Obtener pedido activo por mesa
+        public entPedido ObtenerPedidoPorMesa(int mesaId)
+        {
+            SqlCommand cmd = null;
+            entPedido pedido = null;
+
+            try
+            {
+                SqlConnection cn = Conexion.Instancia.Conectar();
+                cmd = new SqlCommand("sp_ObtenerPedidoPorMesa", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@MesaId", mesaId);
+                cn.Open();
+
+                SqlDataReader dr = cmd.ExecuteReader();
+                if (dr.Read())
+                {
+                    pedido = new entPedido
+                    {
+                        PedidoId = Convert.ToInt32(dr["PedidoId"]),
+                        MesaId = Convert.ToInt32(dr["MesaId"]),
+                        NroMesa = Convert.ToInt32(dr["NroMesa"]),
+                        UsuarioId = Convert.ToInt32(dr["UsuarioId"]),
+                        NombreMozo = dr["NombreMozo"].ToString(),
+                        Fecha = Convert.ToDateTime(dr["Fecha"]),
+                        PrecioTotal = Convert.ToDecimal(dr["PrecioTotal"]),
+                        Estado = Convert.ToBoolean(dr["Estado"])
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+
+            return pedido;
+        }
+
+        // Eliminar un detalle
+        public bool EliminarDetalle(int detalleId)
+        {
+            SqlCommand cmd = null;
+            bool elimina = false;
+
+            try
+            {
+                SqlConnection cn = Conexion.Instancia.Conectar();
+                cmd = new SqlCommand("sp_EliminarDetalle", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@DetalleId", detalleId);
+                cn.Open();
+
+                int filas = cmd.ExecuteNonQuery();
+                if (filas > 0) elimina = true;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+
+            return elimina;
+        }
+
+        // Agregar detalle a pedido existente
+        public bool AgregarDetalle(int pedidoId, entDetallePedido detalle)
+        {
+            SqlCommand cmd = null;
+            bool agrega = false;
+
+            try
+            {
+                SqlConnection cn = Conexion.Instancia.Conectar();
+                cmd = new SqlCommand("sp_AgregarDetalle", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@PedidoId", pedidoId);
+                cmd.Parameters.AddWithValue("@VarianteId", detalle.VarianteId);
+                cmd.Parameters.AddWithValue("@Cantidad", detalle.Cantidad);
+                cmd.Parameters.AddWithValue("@PrecioUnitario", detalle.PrecioUnitario);
+                cmd.Parameters.AddWithValue("@SubTotal", detalle.SubTotal);
+                cn.Open();
+
+                int filas = cmd.ExecuteNonQuery();
+                if (filas > 0) agrega = true;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+
+            return agrega;
+        }
+
+        // Actualizar cantidad de un detalle
+        public bool ActualizarCantidadDetalle(int detalleId, int nuevaCantidad)
+        {
+            SqlCommand cmd = null;
+            bool actualiza = false;
+
+            try
+            {
+                SqlConnection cn = Conexion.Instancia.Conectar();
+                cmd = new SqlCommand("sp_ActualizarCantidadDetalle", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@DetalleId", detalleId);
+                cmd.Parameters.AddWithValue("@NuevaCantidad", nuevaCantidad);
+                cn.Open();
+
+                int filas = cmd.ExecuteNonQuery();
+                if (filas > 0) actualiza = true;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+
+            return actualiza;
+        }
+
+        // Actualizar total del pedido
+        public bool ActualizarTotalPedido(int pedidoId, decimal nuevoTotal)
+        {
+            SqlCommand cmd = null;
+            bool actualiza = false;
+
+            try
+            {
+                SqlConnection cn = Conexion.Instancia.Conectar();
+                cmd = new SqlCommand("sp_ActualizarTotalPedido", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@PedidoId", pedidoId);
+                cmd.Parameters.AddWithValue("@NuevoTotal", nuevoTotal);
+                cn.Open();
+
+                int filas = cmd.ExecuteNonQuery();
+                if (filas > 0) actualiza = true;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+
+            return actualiza;
+        }
     }
 }

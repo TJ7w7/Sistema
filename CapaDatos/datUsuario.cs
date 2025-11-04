@@ -47,7 +47,7 @@ namespace CapaDatos
                         Pass = dr["Pass"].ToString(),
                         Estado = Convert.ToBoolean(dr["Estado"]),
                         EstacionId = dr["EstacionId"] != DBNull.Value ? Convert.ToInt32(dr["EstacionId"]) : (int?)null,
-                        EstacionNombre = dr["NombreEstacion"] != DBNull.Value ? dr["EstacionNombre"].ToString() : null
+                        EstacionNombre = dr["NombreEstacion"] != DBNull.Value ? dr["NombreEstacion"].ToString() : null
                     };
                     lista.Add(u);
                 }
@@ -181,7 +181,7 @@ namespace CapaDatos
                         // Leer nombre de estación intentando dos alias posibles
                         try
                         {
-                            int idx = dr.GetOrdinal("EstacionNombre");
+                            int idx = dr.GetOrdinal("NombreEstacion");
                             u.EstacionNombre = dr.IsDBNull(idx) ? null : dr.GetString(idx);
                         }
                         catch (IndexOutOfRangeException)
@@ -282,7 +282,7 @@ namespace CapaDatos
                         // Obtener nombre de estación si existe
                         try
                         {
-                            int idx = dr.GetOrdinal("EstacionNombre");
+                            int idx = dr.GetOrdinal("NombreEstacion");
                             u.EstacionNombre = dr.IsDBNull(idx) ? null : dr.GetString(idx);
                         }
                         catch (IndexOutOfRangeException)

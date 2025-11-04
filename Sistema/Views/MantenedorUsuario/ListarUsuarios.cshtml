@@ -45,6 +45,43 @@
                     url: '@Url.Action("ObtenerUsuarios", "MantenedorUsuario")',
                     dataSrc: "data"
                 },
+                // columns: [
+                //     { data: "usuarioId" },
+                //     { data: "rol" },
+                //     { data: "nombre" },
+                //     { data: "apellido" },
+                //     { data: "userName" },
+                //     {
+                //         data: "estacionId",
+                //         render: function (data) {
+                //             return data ? data : "—";
+                //         }
+                //     },
+                //     {
+                //         data: "estado",
+                //         render: function (data) {
+                //             return data ? "Activo ✅" : "Inactivo ❌";
+                //         }
+                //     },
+                //     {
+                //         data: "usuarioId",
+                //         render: function (data, type, row) {
+                //             return `
+                //                 <button class="btn btn-sm btn-warning btn-editar"
+                //                         data-id="${row.usuarioId}"
+                //                         data-rol="${row.rol}"
+                //                         data-nombre="${row.nombre}"
+                //                         data-apellido="${row.apellido}"
+                //                         data-estacionid="${row.estacionId}"
+                //                         data-username="${row.userName}"
+                //                         data-pass="${row.pass}"
+                //                         data-estado="${row.estado}">
+                //                     Editar
+                //                 </button>
+                //             `;
+                //         }
+                //     }
+                // ],
                 columns: [
                     { data: "usuarioId" },
                     { data: "rol" },
@@ -52,9 +89,9 @@
                     { data: "apellido" },
                     { data: "userName" },
                     {
-                        data: "estacionId",
+                        data: "estacionNombre",  // ⭐ Cambiar de estacionId a estacionNombre
                         render: function (data) {
-                            return data ? data : "—";
+                            return data ? data : "—";  // ⭐ Mostrar nombre o guión
                         }
                     },
                     {
@@ -72,7 +109,8 @@
                                         data-rol="${row.rol}"
                                         data-nombre="${row.nombre}"
                                         data-apellido="${row.apellido}"
-                                        data-estacionid="${row.estacionId}"
+                                        data-estacionid="${row.estacionId || ''}"
+                                        data-estacionnombre="${row.estacionNombre || ''}"
                                         data-username="${row.userName}"
                                         data-pass="${row.pass}"
                                         data-estado="${row.estado}">

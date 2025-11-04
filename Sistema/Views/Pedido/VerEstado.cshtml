@@ -1,0 +1,246 @@
+﻿@{
+    ViewData["Title"] = "Estado del Pedido";
+    Layout = "~/Views/Shared/_LayoutMozo.cshtml";
+}
+
+<div class="contenedor-estado-pedido">
+    <!-- Encabezado -->
+    <div class="encabezado-estado">
+        <button class="btn-volver" onclick="volverMesas()">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <div class="info-pedido-estado">
+            <h2>Mesa @ViewBag.NroMesa</h2>
+            <p>@ViewBag.NombreMesero</p>
+            <span class="badge-pedido">Pedido #@ViewBag.PedidoId</span>
+        </div>
+        <button class="btn-finalizar-pedido" onclick="finalizarPedido()">
+            <i class="bi bi-check-circle"></i>
+        </button>
+    </div>
+
+    <!-- Resumen del pedido -->
+    <div class="resumen-pedido">
+        <div class="resumen-item">
+            <span class="label">Total:</span>
+            <span class="valor" id="totalPedido">S/ 0.00</span>
+        </div>
+        <div class="resumen-item">
+            <span class="label">Productos:</span>
+            <span class="valor" id="cantidadProductos">0</span>
+        </div>
+    </div>
+
+    <!-- Filtros de estado -->
+    <div class="filtros-estado">
+        <button class="btn-filtro active" data-estado="todos" onclick="filtrarPorEstado('todos')">
+            Todos
+        </button>
+        <button class="btn-filtro" data-estado="Pendiente" onclick="filtrarPorEstado('Pendiente')">
+            Pendiente
+        </button>
+        <button class="btn-filtro" data-estado="En Preparación" onclick="filtrarPorEstado('En Preparación')">
+            En Preparación
+        </button>
+        <button class="btn-filtro" data-estado="Listo" onclick="filtrarPorEstado('Listo')">
+            Listo
+        </button>
+        <button class="btn-filtro" data-estado="Entregado" onclick="filtrarPorEstado('Entregado')">
+            Entregado
+        </button>
+    </div>
+
+    <!-- Lista de productos -->
+    <div class="lista-productos-estado" id="listaProductos">
+        <div class="loading-container">
+            <p>Cargando productos...</p>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="~/css/ver-estado.css" />
+
+<script>
+    const pedidoId = @ViewBag.PedidoId;
+    const mesaId = @ViewBag.MesaId;
+    let productos = [];
+    let estadoFiltro = 'todos';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarProductos();
+    });
+
+    function cargarProductos() {
+        fetch(`@Url.Action("ObtenerDetallePedido", "Pedido")?pedidoId=${pedidoId}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    productos = result.data;
+                    mostrarProductos();
+                    actualizarResumen();
+                } else {
+                    mostrarError(result.mensaje);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarError('Error al cargar productos');
+            });
+    }
+
+    function mostrarProductos() {
+        const contenedor = document.getElementById('listaProductos');
+
+        if (productos.length === 0) {
+            contenedor.innerHTML = '<div class="sin-productos"><p>No hay productos en este pedido</p></div>';
+            return;
+        }
+
+        // Filtrar productos según el estado seleccionado
+        let productosFiltrados = productos;
+        if (estadoFiltro !== 'todos') {
+            productosFiltrados = productos.filter(p => p.estadoDetalle === estadoFiltro);
+        }
+
+        if (productosFiltrados.length === 0) {
+            contenedor.innerHTML = `<div class="sin-productos"><p>No hay productos en estado: ${estadoFiltro}</p></div>`;
+            return;
+        }
+
+        let html = '';
+        productosFiltrados.forEach(producto => {
+            const puedeEntregar = producto.estadoDetalle === 'Listo';
+            const estadoClass = producto.estadoDetalle.toLowerCase().replace(' ', '-');
+
+            html += `
+                <div class="producto-estado-card ${estadoClass}">
+                    <div class="producto-info-estado">
+                        <h4>${producto.nombreProducto}</h4>
+                        <p class="detalle-producto">${producto.tamaño} × ${producto.cantidad}</p>
+                        <p class="precio-producto">S/ ${producto.subTotal.toFixed(2)}</p>
+                        ${producto.nombreEstacion ? `<p class="estacion-producto"><i class="bi bi-geo-alt"></i> ${producto.nombreEstacion}</p>` : ''}
+                    </div>
+                    <div class="estado-info">
+                        <span class="badge-estado-grande badge-${estadoClass}">
+                            ${producto.estadoDetalle}
+                        </span>
+                        ${puedeEntregar ? `
+                            <button class="btn-entregar" onclick="marcarComoEntregado(${producto.detalleId})">
+                                <i class="bi bi-check-lg"></i>
+                                Entregar
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        contenedor.innerHTML = html;
+    }
+
+    function actualizarResumen() {
+        const total = productos.reduce((sum, p) => sum + p.subTotal, 0);
+        const cantidad = productos.reduce((sum, p) => sum + p.cantidad, 0);
+
+        document.getElementById('totalPedido').textContent = 'S/ ' + total.toFixed(2);
+        document.getElementById('cantidadProductos').textContent = cantidad;
+    }
+
+    function filtrarPorEstado(estado) {
+        estadoFiltro = estado;
+
+        // Actualizar botones activos
+        document.querySelectorAll('.btn-filtro').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        mostrarProductos();
+    }
+
+    function marcarComoEntregado(detalleId) {
+        if (!confirm('¿Marcar este producto como entregado?')) {
+            return;
+        }
+
+        fetch('@Url.Action("ActualizarEstadoDetalle", "Pedido")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `detalleId=${detalleId}&estadoDetalle=Entregado`
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Actualizar el estado localmente
+                const producto = productos.find(p => p.detalleId === detalleId);
+                if (producto) {
+                    producto.estadoDetalle = 'Entregado';
+                }
+                mostrarProductos();
+
+                // Verificar si todos están entregados
+                verificarTodosEntregados();
+            } else {
+                alert('Error: ' + result.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al actualizar estado');
+        });
+    }
+
+    function verificarTodosEntregados() {
+        const todosEntregados = productos.every(p => p.estadoDetalle === 'Entregado');
+
+        if (todosEntregados) {
+            if (confirm('¡Todos los productos han sido entregados! ¿Desea finalizar el pedido y liberar la mesa?')) {
+                finalizarPedido();
+            }
+        }
+    }
+
+    function finalizarPedido() {
+        const todosEntregados = productos.every(p => p.estadoDetalle === 'Entregado');
+
+        if (!todosEntregados) {
+            const pendientes = productos.filter(p => p.estadoDetalle !== 'Entregado').length;
+            if (!confirm(`Aún hay ${pendientes} producto(s) sin entregar. ¿Está seguro de finalizar el pedido?`)) {
+                return;
+            }
+        }
+
+        fetch('@Url.Action("FinalizarPedido", "Pedido")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `pedidoId=${pedidoId}`
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('Pedido finalizado. Mesa liberada.');
+                window.location.href = '@Url.Action("Index", "Mozo")';
+            } else {
+                alert('Error: ' + result.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al finalizar pedido');
+        });
+    }
+
+    function volverMesas() {
+        window.location.href = '@Url.Action("Mozo", "Mozo")';
+    }
+
+    function mostrarError(mensaje) {
+        const contenedor = document.getElementById('listaProductos');
+        contenedor.innerHTML = `
+            <div class="error-container">
+                <p class="error-mensaje">${mensaje}</p>
+                <button class="btn-reintentar" onclick="cargarProductos()">Reintentar</button>
+            </div>
+        `;
+    }
+</script>

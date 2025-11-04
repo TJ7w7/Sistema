@@ -1,0 +1,556 @@
+﻿/* ===== CONTENEDOR PRINCIPAL ===== */
+.contenedor-cocina {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* ===== ENCABEZADO ===== */
+.encabezado-cocina {
+    background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.info-estacion h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-estacion p {
+    margin: 5px 0 0;
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+.btn-refrescar {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+    .btn-refrescar:hover {
+        background: white;
+        color: #dc3545;
+    }
+
+/* ===== ESTADÍSTICAS ===== */
+.estadisticas-cocina {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card i {
+        font-size: 2.5rem;
+    }
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-numero {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.stat-pendiente i {
+    color: #ffc107;
+}
+
+.stat-pendiente .stat-numero {
+    color: #ffc107;
+}
+
+.stat-preparacion i {
+    color: #17a2b8;
+}
+
+.stat-preparacion .stat-numero {
+    color: #17a2b8;
+}
+
+.stat-listo i {
+    color: #28a745;
+}
+
+.stat-listo .stat-numero {
+    color: #28a745;
+}
+
+/* ===== FILTROS ===== */
+.filtros-cocina {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-filtro-cocina {
+    background: white;
+    border: 2px solid #e0e0e0;
+    color: #666;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+    .btn-filtro-cocina:hover {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    .btn-filtro-cocina.active {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+
+/* ===== GRID DE PEDIDOS ===== */
+.grid-pedidos-cocina {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* ===== CARD DE PEDIDO ===== */
+.card-pedido-cocina {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+    .card-pedido-cocina:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        transform: translateY(-3px);
+    }
+
+/* Prioridades */
+.prioridad-alta {
+    border-left: 5px solid #dc3545;
+    animation: pulse 2s infinite;
+}
+
+.prioridad-media {
+    border-left: 5px solid #ffc107;
+}
+
+.prioridad-normal {
+    border-left: 5px solid #28a745;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 3px 20px rgba(220, 53, 69, 0.6);
+    }
+}
+
+/* ===== HEADER DEL PEDIDO ===== */
+.header-pedido-cocina {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.info-mesa h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mozo-info {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 5px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+}
+
+    .mozo-info i {
+        color: #e56717;
+    }
+
+.tiempo-pedido {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    color: #666;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+    .tiempo-pedido i {
+        font-size: 1.1rem;
+        color: #dc3545;
+    }
+
+/* ===== BODY DEL PEDIDO ===== */
+.body-pedido-cocina {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ===== PRODUCTO EN COCINA ===== */
+.producto-cocina {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #dee2e6;
+    transition: all 0.3s;
+}
+
+    .producto-cocina.pendiente {
+        border-left-color: #ffc107;
+        background: #fff9e6;
+    }
+
+    .producto-cocina.en-preparación {
+        border-left-color: #17a2b8;
+        background: #e7f6f8;
+    }
+
+    .producto-cocina.listo {
+        border-left-color: #28a745;
+        background: #e8f5e9;
+    }
+
+.producto-info-cocina h4 {
+    margin: 0 0 5px;
+    color: #333;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cantidad-badge {
+    background: #dc3545;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.tamaño-producto {
+    color: #666;
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+/* ===== TEMPORIZADOR ===== */
+.temporizador {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #e7f6f8;
+    padding: 6px 12px;
+    border-radius: 15px;
+    margin: 8px 0;
+    font-weight: 600;
+    font-size: 1rem;
+    border: 2px solid #17a2b8;
+}
+
+    .temporizador i {
+        font-size: 1.2rem;
+        color: #17a2b8;
+        animation: pulse-timer 1.5s infinite;
+    }
+
+@keyframes pulse-timer {
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.tiempo-preparacion {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    color: #17a2b8;
+    font-weight: bold;
+    min-width: 50px;
+    text-align: center;
+}
+
+.badge-estado-cocina {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-pendiente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-en-preparación {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge-listo {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* ===== ACCIONES ===== */
+.producto-acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-accion-cocina {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.btn-iniciar {
+    background: #17a2b8;
+    color: white;
+}
+
+    .btn-iniciar:hover {
+        background: #138496;
+        transform: scale(1.05);
+    }
+
+.btn-finalizar {
+    background: #28a745;
+    color: white;
+}
+
+    .btn-finalizar:hover {
+        background: #218838;
+        transform: scale(1.05);
+    }
+
+.texto-listo {
+    color: #28a745;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+}
+
+/* ===== MENSAJES ===== */
+.loading-container,
+.sin-pedidos,
+.error-container {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+}
+
+    .sin-pedidos i,
+    .error-container i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 15px;
+    }
+
+    .sin-pedidos p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #dc3545;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.error-mensaje {
+    color: #dc3545;
+    margin: 15px 0;
+    font-size: 1.1rem;
+}
+
+.btn-reintentar {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .btn-reintentar:hover {
+        background: #c82333;
+    }
+
+/* ===== NOTIFICACIONES ===== */
+.notificacion-cocina {
+    position: fixed;
+    top: 20px;
+    right: -300px;
+    background: #28a745;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    z-index: 9999;
+    transition: right 0.3s;
+}
+
+    .notificacion-cocina.show {
+        right: 20px;
+    }
+
+    .notificacion-cocina i {
+        font-size: 1.5rem;
+    }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .contenedor-cocina {
+        padding: 10px;
+    }
+
+    .encabezado-cocina {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .info-estacion h1 {
+        font-size: 1.5rem;
+    }
+
+    .grid-pedidos-cocina {
+        grid-template-columns: 1fr;
+    }
+
+    .estadisticas-cocina {
+        grid-template-columns: 1fr;
+    }
+
+    .producto-cocina {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .producto-acciones {
+        width: 100%;
+    }
+
+    .btn-accion-cocina {
+        width: 100%;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+    .grid-pedidos-cocina {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
